@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+
+# NetBeans / Java build output and per-user local settings
+build/
+**/nbproject/private/
