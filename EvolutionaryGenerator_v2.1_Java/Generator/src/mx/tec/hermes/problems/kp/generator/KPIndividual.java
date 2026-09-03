@@ -78,13 +78,15 @@ public class KPIndividual extends Individual {
         BitSet tmp;
         KPIndividual[] offspring;
         offspring = new KPIndividual[]{(KPIndividual) this, (KPIndividual) individual};
-        crossoverPoint = random.nextInt(nbBits);
-        tmp = (BitSet) offspring[1].chromosome.clone();
-        for (int i = 0; i < crossoverPoint; i++) {
-            offspring[1].chromosome.set(i, offspring[0].chromosome.get(i));
-        }
-        for (int i = 0; i < crossoverPoint; i++) {
-            offspring[0].chromosome.set(i, tmp.get(i));
+        if (random.nextDouble() < crossoverRate) {
+            crossoverPoint = random.nextInt(nbBits);
+            tmp = (BitSet) offspring[1].chromosome.clone();
+            for (int i = 0; i < crossoverPoint; i++) {
+                offspring[1].chromosome.set(i, offspring[0].chromosome.get(i));
+            }
+            for (int i = 0; i < crossoverPoint; i++) {
+                offspring[0].chromosome.set(i, tmp.get(i));
+            }
         }
         return offspring;
     }
@@ -123,14 +125,6 @@ public class KPIndividual extends Individual {
             from = from + bitsWeight;
             bits = chromosome.get(from, from + bitsProfit);
             profit = toInteger(bits);
-            // hack, borrar!
-            /*
-            profit = (int) ((profit + 1) / 128.0 * 100);
-            if (profit == 0 || profit > 100) {
-                System.out.println("Out of range generation.");
-                System.out.println(profit);
-                System.exit(1);
-            }*/
             items.add(new Item(i, profit, weight));
         }
         return new KP(items, capacity);
