@@ -78,13 +78,15 @@ public class KPIndividual extends Individual {
         BitSet tmp;
         KPIndividual[] offspring;
         offspring = new KPIndividual[]{(KPIndividual) this, (KPIndividual) individual};
-        crossoverPoint = random.nextInt(nbBits);
-        tmp = (BitSet) offspring[1].chromosome.clone();
-        for (int i = 0; i < crossoverPoint; i++) {
-            offspring[1].chromosome.set(i, offspring[0].chromosome.get(i));
-        }
-        for (int i = 0; i < crossoverPoint; i++) {
-            offspring[0].chromosome.set(i, tmp.get(i));
+        if (random.nextDouble() < crossoverRate) {
+            crossoverPoint = random.nextInt(nbBits);
+            tmp = (BitSet) offspring[1].chromosome.clone();
+            for (int i = 0; i < crossoverPoint; i++) {
+                offspring[1].chromosome.set(i, offspring[0].chromosome.get(i));
+            }
+            for (int i = 0; i < crossoverPoint; i++) {
+                offspring[0].chromosome.set(i, tmp.get(i));
+            }
         }
         return offspring;
     }
