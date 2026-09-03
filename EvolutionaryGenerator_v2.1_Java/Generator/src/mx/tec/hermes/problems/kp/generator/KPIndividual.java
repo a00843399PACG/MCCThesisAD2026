@@ -123,14 +123,6 @@ public class KPIndividual extends Individual {
             from = from + bitsWeight;
             bits = chromosome.get(from, from + bitsProfit);
             profit = toInteger(bits);
-            // hack, borrar!
-            /*
-            profit = (int) ((profit + 1) / 128.0 * 100);
-            if (profit == 0 || profit > 100) {
-                System.out.println("Out of range generation.");
-                System.out.println(profit);
-                System.exit(1);
-            }*/
             items.add(new Item(i, profit, weight));
         }
         return new KP(items, capacity);
