@@ -86,12 +86,13 @@ class KPIndividual(Individual):
 
     def combine(self, individual: Individual, crossover_rate: float) -> list:
         offspring = [self, individual]
-        crossover_point = self.random.next_int(KPIndividual.nb_bits)
-        tmp = offspring[1].chromosome.clone()
-        for i in range(crossover_point):
-            offspring[1].chromosome.set(i, offspring[0].chromosome.get(i))
-        for i in range(crossover_point):
-            offspring[0].chromosome.set(i, tmp.get(i))
+        if self.random.next_double() < crossover_rate:
+            crossover_point = self.random.next_int(KPIndividual.nb_bits)
+            tmp = offspring[1].chromosome.clone()
+            for i in range(crossover_point):
+                offspring[1].chromosome.set(i, offspring[0].chromosome.get(i))
+            for i in range(crossover_point):
+                offspring[0].chromosome.set(i, tmp.get(i))
         return offspring
 
     def mutate(self, mutation_rate: float) -> None:
@@ -119,15 +120,6 @@ class KPIndividual(Individual):
             from_index = from_index + bits_weight
             bits = self.chromosome.get(from_index, from_index + bits_profit)
             profit = KPIndividual.to_integer(bits)
-            # hack, borrar!  ["hack, delete!" -- commented out block left by the author
-            # in the Java original, kept verbatim.]
-            #
-            # profit = int((profit + 1) / 128.0 * 100)
-            # if profit == 0 or profit > 100:
-            #     print("Out of range generation.")
-            #     print(profit)
-            #     sys.exit(1)
-            #
             items.append(Item(i, profit, weight))
         return KP(items, KPIndividual.capacity)
 
