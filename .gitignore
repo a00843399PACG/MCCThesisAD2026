@@ -8,3 +8,7 @@ __pycache__/
 # NetBeans / Java build output and per-user local settings
 build/
 **/nbproject/private/
+
+# javac output of the minimal build
+bin/
+*.class
