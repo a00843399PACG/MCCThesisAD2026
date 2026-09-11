@@ -70,14 +70,21 @@ def build():
     return A1STAR / "bin"
 
 
-def cell_dir(n, bits, alpha, c):
-    return f"n{n}_b{bits}_a{alpha:g}_c{c}"
+def cell_dir(n, bits, alpha, c, lam=None):
+    """The mutation component is appended only when lambda_m is an axis of the design.
+
+    A campaign that holds lambda_m fixed keeps the shorter name, so a run started before
+    the sweep existed still resumes: shard_done looks for the same directory it wrote.
+    """
+    name = f"n{n}_b{bits}_a{alpha:g}_c{c}"
+    return name if lam is None else f"{name}_m{lam:g}"
 
 
 def parse_cell(name):
-    """n100_b10_a0.25_c12812 -> (100, 10, 0.25, 12812)"""
+    """n100_b10_a0.25_c12812[_m11] -> (100, 10, 0.25, 12812, 11.0 or None)"""
     parts = {p[0]: p[1:] for p in name.split("_")}
-    return int(parts["n"]), int(parts["b"]), float(parts["a"]), int(parts["c"])
+    return (int(parts["n"]), int(parts["b"]), float(parts["a"]), int(parts["c"]),
+            float(parts["m"]) if "m" in parts else None)
 
 
 def shard_files(path, ident, bits, n, instances):
@@ -103,8 +110,8 @@ def shard_done(path, ident, bits, n, instances):
 
 
 def _run_one(bin_dir, out_dir, type_name, n, c, bits, alpha, instances, seed, mu, pc, pm, k,
-             force=False):
-    path = Path(out_dir) / cell_dir(n, bits, alpha, c) / type_name
+             force=False, lam_tag=None):
+    path = Path(out_dir) / cell_dir(n, bits, alpha, c, lam_tag) / type_name
     path.mkdir(parents=True, exist_ok=True)
     ident = f"{type_name}_s{seed}"
     if not force and shard_done(path, ident, bits, n, instances):
@@ -131,18 +138,24 @@ def mutation_rate(n, bits, pm, lambda_m):
 
 
 def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, pm, k,
-             lambda_m, force=False):
+             lambdas, force=False):
     # The seed is the OUTERMOST loop on purpose. A long campaign is then useful before it
     # finishes: after one pass over the seeds there are `instances` instances in every cell
     # of the design, rather than a complete first configuration and nothing else.
+    sweeping = len(lambdas) > 1
     tasks = []
     for s in range(1, seeds + 1):
         for (n, bits, alpha) in configs:
             c = capacity_for(n, bits, alpha)
-            rate = mutation_rate(n, bits, pm, lambda_m)
-            for t in types:
-                tasks.append((bin_dir, out_dir, t, n, c, bits, alpha, instances,
-                              100003 * bits + 1009 * s + 7 * n, mu, pc, rate, k, force))
+            for lam in lambdas:
+                rate = mutation_rate(n, bits, pm, lam)
+                tag = (rate * n * 2 * bits) if sweeping else None
+                for t in types:
+                    # The seed ignores lambda_m as it ignores alpha: the levels of the
+                    # mutation axis are then compared on shared random numbers.
+                    tasks.append((bin_dir, out_dir, t, n, c, bits, alpha, instances,
+                                  100003 * bits + 1009 * s + 7 * n, mu, pc, rate, k,
+                                  force, tag))
     done, failures, skipped, started = 0, [], 0, time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         futs = [pool.submit(_run_one, *t) for t in tasks]
@@ -238,13 +251,14 @@ def features(path, type_name, bits, alpha_nominal, pm):
     }
 
 
-def collect(out_dir, pm, lambda_m):
+def collect(out_dir, pm, lambdas):
+    single = lambdas[0] if len(lambdas) == 1 else None
     rows = []
     for kp in sorted(Path(out_dir).rglob("*.kp")):
         type_name = kp.parent.name
-        n, bits, alpha, _c = parse_cell(kp.parent.parent.name)
+        n, bits, alpha, _c, lam = parse_cell(kp.parent.parent.name)
         rows.append(features(kp, type_name, bits, alpha,
-                             mutation_rate(n, bits, pm, lambda_m)))
+                             mutation_rate(n, bits, pm, lam if lam is not None else single)))
     return rows
 
 
@@ -265,8 +279,9 @@ def main():
     ap.add_argument("--mu", type=int, default=10)
     ap.add_argument("--pc", type=float, default=0.8)
     ap.add_argument("--pm", type=float, default=0.1)
-    ap.add_argument("--lambda-m", type=float, default=None,
-                    help="expected flips per offspring; overrides --pm as pm = lambda_m / L")
+    ap.add_argument("--lambda-m", type=float, nargs="+", default=None,
+                    help="expected flips per offspring; overrides --pm as pm = lambda_m / L. "
+                         "Several values make it an axis of the design, swept like n or alpha.")
     ap.add_argument("--k", type=int, default=3)
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--skip-generate", action="store_true",
@@ -277,23 +292,27 @@ def main():
 
     out = Path(args.out)
     configs = [(n, b, a) for n in args.n for b in args.bits for a in args.alphas]
+    lambdas = args.lambda_m if args.lambda_m else [None]
 
     print(f"{'n':>6} {'bits':>5} {'Wmax=Pmax':>10} {'L':>8} {'alpha':>6} {'c':>10} "
           f"{'pm':>10} {'lambda_m':>9}")
     for (n, bits, a) in configs:
-        rate = mutation_rate(n, bits, args.pm, args.lambda_m)
-        print(f"{n:>6} {bits:>5} {1 << bits:>10} {n * 2 * bits:>8} {a:>6g} "
-              f"{capacity_for(n, bits, a):>10} {rate:>10.2e} {rate * n * 2 * bits:>9.1f}")
-    total = len(configs) * len(args.types) * args.seeds * args.instances
-    print(f"\n{total} instances over {len(configs)} configurations "
+        for lam in lambdas:
+            rate = mutation_rate(n, bits, args.pm, lam)
+            print(f"{n:>6} {bits:>5} {1 << bits:>10} {n * 2 * bits:>8} {a:>6g} "
+                  f"{capacity_for(n, bits, a):>10} {rate:>10.2e} {rate * n * 2 * bits:>9.1f}")
+    cells = len(configs) * len(lambdas)
+    total = cells * len(args.types) * args.seeds * args.instances
+    print(f"\n{total} instances over {cells} cells "
+          f"({len(configs)} configurations x {len(lambdas)} mutation levels) "
           f"x {len(args.types)} types\n")
 
     if not args.skip_generate:
         bin_dir = build()
         generate(bin_dir, out, configs, args.types, args.seeds, args.instances,
-                 args.jobs, args.mu, args.pc, args.pm, args.k, args.lambda_m, args.force)
+                 args.jobs, args.mu, args.pc, args.pm, args.k, lambdas, args.force)
 
-    rows = collect(out, args.pm, args.lambda_m)
+    rows = collect(out, args.pm, lambdas)
     if not rows:
         raise SystemExit(f"no .kp under {out}")
     csv_path = out / "features.csv"
