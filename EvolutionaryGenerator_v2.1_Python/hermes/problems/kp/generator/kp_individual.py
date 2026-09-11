@@ -86,13 +86,12 @@ class KPIndividual(Individual):
 
     def combine(self, individual: Individual, crossover_rate: float) -> list:
         offspring = [self, individual]
-        if self.random.next_double() < crossover_rate:
-            crossover_point = self.random.next_int(KPIndividual.nb_bits)
-            tmp = offspring[1].chromosome.clone()
-            for i in range(crossover_point):
-                offspring[1].chromosome.set(i, offspring[0].chromosome.get(i))
-            for i in range(crossover_point):
-                offspring[0].chromosome.set(i, tmp.get(i))
+        crossover_point = self.random.next_int(KPIndividual.nb_bits)
+        tmp = offspring[1].chromosome.clone()
+        for i in range(crossover_point):
+            offspring[1].chromosome.set(i, offspring[0].chromosome.get(i))
+        for i in range(crossover_point):
+            offspring[0].chromosome.set(i, tmp.get(i))
         return offspring
 
     def mutate(self, mutation_rate: float) -> None:
