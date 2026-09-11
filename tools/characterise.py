@@ -80,10 +80,37 @@ def parse_cell(name):
     return int(parts["n"]), int(parts["b"]), float(parts["a"]), int(parts["c"])
 
 
-def _run_one(bin_dir, out_dir, type_name, n, c, bits, alpha, instances, seed, mu, pc, pm, k):
+def shard_files(path, ident, bits, n, instances):
+    w = p = 1 << bits
+    return [Path(path) / f"{ident}_{w}_{p}_{n}_{i:03d}.kp" for i in range(instances)]
+
+
+def shard_done(path, ident, bits, n, instances):
+    """True when this shard's files are all present and complete.
+
+    A campaign of this length will be interrupted, so a rerun must not redo what is
+    already on disk. Completeness is checked, not just existence: a run killed mid-write
+    leaves a truncated file, which would otherwise be taken for a finished one. An
+    instance has one header line plus one line per item.
+    """
+    for f in shard_files(path, ident, bits, n, instances):
+        try:
+            if sum(1 for line in f.open(encoding="utf-8") if line.strip()) != n + 1:
+                return False
+        except OSError:
+            return False
+    return True
+
+
+def _run_one(bin_dir, out_dir, type_name, n, c, bits, alpha, instances, seed, mu, pc, pm, k,
+             force=False):
     path = Path(out_dir) / cell_dir(n, bits, alpha, c) / type_name
     path.mkdir(parents=True, exist_ok=True)
     ident = f"{type_name}_s{seed}"
+    if not force and shard_done(path, ident, bits, n, instances):
+        return "skipped"
+    for f in shard_files(path, ident, bits, n, instances):
+        f.unlink(missing_ok=True)          # drop any truncated leftovers
     cmd = ["java", "-cp", str(bin_dir), "Run", type_name, str(instances), ident,
            str(path) + "/", str(n), str(c), str(1 << bits), str(1 << bits),
            str(mu), str(pc), repr(pm), str(k), str(seed)]
@@ -103,7 +130,8 @@ def mutation_rate(n, bits, pm, lambda_m):
     return lambda_m / (n * 2 * bits)
 
 
-def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, pm, k, lambda_m):
+def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, pm, k,
+             lambda_m, force=False):
     # The seed is the OUTERMOST loop on purpose. A long campaign is then useful before it
     # finishes: after one pass over the seeds there are `instances` instances in every cell
     # of the design, rather than a complete first configuration and nothing else.
@@ -114,13 +142,16 @@ def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, p
             rate = mutation_rate(n, bits, pm, lambda_m)
             for t in types:
                 tasks.append((bin_dir, out_dir, t, n, c, bits, alpha, instances,
-                              100003 * bits + 1009 * s + 7 * n, mu, pc, rate, k))
-    done, failures, started = 0, [], time.time()
+                              100003 * bits + 1009 * s + 7 * n, mu, pc, rate, k, force))
+    done, failures, skipped, started = 0, [], 0, time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         futs = [pool.submit(_run_one, *t) for t in tasks]
         for f in concurrent.futures.as_completed(futs):
             err = f.result()
             done += 1
+            if err == "skipped":
+                skipped += 1
+                err = None
             if err:
                 # A long campaign must not lose every completed run to one bad shard;
                 # the .kp files already on disk stay, and --skip-generate rebuilds the
@@ -129,12 +160,18 @@ def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, p
                 print(f"  FAILED {err}", flush=True)
             if done % 10 == 0 or done == len(tasks):
                 elapsed = time.time() - started
-                eta = elapsed / done * (len(tasks) - done)
-                print(f"  [{time.strftime('%H:%M:%S')}] {done}/{len(tasks)} runs, "
-                      f"elapsed {elapsed / 60:.0f} min, eta {eta / 60:.0f} min",
+                fresh = done - skipped
+                # Skipped shards cost nothing, so the estimate must be built from the
+                # ones actually run, or a resumed campaign reports a wild eta.
+                eta = (elapsed / fresh * (len(tasks) - done)) if fresh else 0
+                print(f"  [{time.strftime('%H:%M:%S')}] {done}/{len(tasks)} runs"
+                      + (f" ({skipped} already on disk)" if skipped else "")
+                      + f", elapsed {elapsed / 60:.0f} min, eta {eta / 60:.0f} min",
                       flush=True)
+    if skipped:
+        print(f"\n{skipped} shards were already complete and were not rerun.")
     if failures:
-        print(f"\n{len(failures)} of {len(tasks)} runs failed; the rest were kept.")
+        print(f"{len(failures)} of {len(tasks)} runs failed; the rest were kept.")
 
 
 # ----------------------------------------------------------------- the features
@@ -232,7 +269,10 @@ def main():
                     help="expected flips per offspring; overrides --pm as pm = lambda_m / L")
     ap.add_argument("--k", type=int, default=3)
     ap.add_argument("--jobs", type=int, default=8)
-    ap.add_argument("--skip-generate", action="store_true")
+    ap.add_argument("--skip-generate", action="store_true",
+                    help="build the table from the .kp already on disk, generating nothing")
+    ap.add_argument("--force", action="store_true",
+                    help="regenerate shards that are already complete")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -251,7 +291,7 @@ def main():
     if not args.skip_generate:
         bin_dir = build()
         generate(bin_dir, out, configs, args.types, args.seeds, args.instances,
-                 args.jobs, args.mu, args.pc, args.pm, args.k, args.lambda_m)
+                 args.jobs, args.mu, args.pc, args.pm, args.k, args.lambda_m, args.force)
 
     rows = collect(out, args.pm, args.lambda_m)
     if not rows:
