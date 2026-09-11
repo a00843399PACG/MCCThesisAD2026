@@ -12,3 +12,6 @@ build/
 # javac output of the minimal build
 bin/
 *.class
+
+# campaign output (large, regenerable)
+runs/
