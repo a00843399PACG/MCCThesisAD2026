@@ -16,6 +16,13 @@ expected total weight under the uniform law:
 which puts the run in the regime alpha, rather than wherever a copied c happens to land.
 (theta3 of the golden grid has alpha = 0.007: a nearly empty knapsack.)
 
+With --require-strict every run goes through Run's -require-strict: an elite with no strict
+margin is discarded and the run retried, so every emitted EASY/HARD file is well labelled and
+what the shipped semantics would have mislabelled shows up as an instance that is missing.
+Those are recorded, per shard, in <ident>.unattained next to the .kp files and gathered in
+unattained.csv, so a resumed campaign does not retry them and the attainment rate can still
+be read off. A strict campaign and a plain one never share an --out directory.
+
 usage:
     python3 tools/characterise.py --out runs/pisinger --alphas 0.05 0.25 0.5 \
         --bits 10 --n 100 --instances 2 --seeds 2 --jobs 8
@@ -92,6 +99,19 @@ def shard_files(path, ident, bits, n, instances):
     return [Path(path) / f"{ident}_{w}_{p}_{n}_{i:03d}.kp" for i in range(instances)]
 
 
+def unattained_file(path, ident):
+    return Path(path) / f"{ident}.unattained"
+
+
+def read_unattained(path, ident):
+    """{file name: attempts} for the instances a strict run gave up on; {} if none recorded."""
+    try:
+        lines = unattained_file(path, ident).read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return {}
+    return {name: int(attempts) for name, attempts in (line.split("\t") for line in lines if line)}
+
+
 def shard_done(path, ident, bits, n, instances):
     """True when this shard's files are all present and complete.
 
@@ -99,8 +119,15 @@ def shard_done(path, ident, bits, n, instances):
     already on disk. Completeness is checked, not just existence: a run killed mid-write
     leaves a truncated file, which would otherwise be taken for a finished one. An
     instance has one header line plus one line per item.
+
+    In a strict campaign an instance recorded as unattained counts as done: its file will
+    never exist, and retrying it on resume would spend the whole retry budget again on the
+    same seeds for the same answer.
     """
+    unattained = read_unattained(path, ident)
     for f in shard_files(path, ident, bits, n, instances):
+        if f.name in unattained:
+            continue
         try:
             if sum(1 for line in f.open(encoding="utf-8") if line.strip()) != n + 1:
                 return False
@@ -110,7 +137,7 @@ def shard_done(path, ident, bits, n, instances):
 
 
 def _run_one(bin_dir, out_dir, type_name, n, c, bits, alpha, instances, seed, mu, pc, pm, k,
-             force=False, lam_tag=None):
+             force=False, lam_tag=None, max_retries=None):
     path = Path(out_dir) / cell_dir(n, bits, alpha, c, lam_tag) / type_name
     path.mkdir(parents=True, exist_ok=True)
     ident = f"{type_name}_s{seed}"
@@ -118,12 +145,23 @@ def _run_one(bin_dir, out_dir, type_name, n, c, bits, alpha, instances, seed, mu
         return "skipped"
     for f in shard_files(path, ident, bits, n, instances):
         f.unlink(missing_ok=True)          # drop any truncated leftovers
+    unattained_file(path, ident).unlink(missing_ok=True)
     cmd = ["java", "-cp", str(bin_dir), "Run", type_name, str(instances), ident,
            str(path) + "/", str(n), str(c), str(1 << bits), str(1 << bits),
            str(mu), str(pc), repr(pm), str(k), str(seed)]
+    if max_retries is not None:
+        cmd += ["-require-strict", "-max-retries", str(max_retries)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         return f"{type_name} seed {seed}: {r.stderr.strip()[:300]}"
+    # Run reports "unattained: <file> after <attempts> attempts (...)" and exits 0. The record
+    # is written only once the process has finished, so a run killed midway leaves none and
+    # is redone in full on resume.
+    unattained = [line.split()[1:4:2] for line in r.stderr.splitlines()
+                  if line.startswith("unattained: ")]
+    if unattained:
+        unattained_file(path, ident).write_text(
+            "".join(f"{Path(f).name}\t{a}\n" for f, a in unattained), encoding="utf-8")
     return None
 
 
@@ -138,7 +176,7 @@ def mutation_rate(n, bits, pm, lambda_m):
 
 
 def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, pm, k,
-             lambdas, force=False):
+             lambdas, force=False, max_retries=None):
     # The seed is the OUTERMOST loop on purpose. A long campaign is then useful before it
     # finishes: after one pass over the seeds there are `instances` instances in every cell
     # of the design, rather than a complete first configuration and nothing else.
@@ -155,7 +193,7 @@ def generate(bin_dir, out_dir, configs, types, seeds, instances, jobs, mu, pc, p
                     # mutation axis are then compared on shared random numbers.
                     tasks.append((bin_dir, out_dir, t, n, c, bits, alpha, instances,
                                   100003 * bits + 1009 * s + 7 * n, mu, pc, rate, k,
-                                  force, tag))
+                                  force, tag, max_retries))
     done, failures, skipped, started = 0, [], 0, time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as pool:
         futs = [pool.submit(_run_one, *t) for t in tasks]
@@ -262,6 +300,44 @@ def collect(out_dir, pm, lambdas):
     return rows
 
 
+def collect_unattained(out_dir, pm, lambdas):
+    single = lambdas[0] if len(lambdas) == 1 else None
+    rows = []
+    for record in sorted(Path(out_dir).rglob("*.unattained")):
+        type_name = record.parent.name
+        n, bits, alpha, c, lam = parse_cell(record.parent.parent.name)
+        rate = mutation_rate(n, bits, pm, lam if lam is not None else single)
+        for name, attempts in read_unattained(record.parent, record.stem).items():
+            rows.append({"file": name, "type": type_name, "n": n, "bits": bits, "c": c,
+                         "alpha": alpha, "lambda_m": rate * n * 2 * bits,
+                         "attempts": attempts})
+    return rows
+
+
+def write_csv(path, rows, fieldnames=None):
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        wr = csv.DictWriter(fh, fieldnames=fieldnames or list(rows[0].keys()))
+        wr.writeheader()
+        wr.writerows(rows)
+
+
+def check_mode(out, strict):
+    """A strict and a plain campaign in one directory would pool two different generators
+    into one features.csv, and each would take the other's shards for its own on resume."""
+    mode = "strict" if strict else "plain"
+    marker = out / "MODE"
+    if marker.exists():
+        found = marker.read_text(encoding="utf-8").strip()
+        if found != mode:
+            raise SystemExit(f"{out} holds a {found} campaign; this one is {mode}")
+    elif any(out.rglob("*.kp")):
+        if strict:
+            raise SystemExit(f"{out} already holds a plain campaign; use another --out")
+    else:
+        out.mkdir(parents=True, exist_ok=True)
+        marker.write_text(mode + "\n", encoding="utf-8")
+
+
 # ------------------------------------------------------------------------ main
 
 
@@ -288,6 +364,14 @@ def main():
                     help="build the table from the .kp already on disk, generating nothing")
     ap.add_argument("--force", action="store_true",
                     help="regenerate shards that are already complete")
+    ap.add_argument("--require-strict", action="store_true",
+                    help="emit only well-labelled EASY/HARD files (Run -require-strict); "
+                         "record the rest as unattained")
+    ap.add_argument("--max-retries", type=int, default=10,
+                    help="with --require-strict, rejections before an instance is unattained")
+    ap.add_argument("--no-build", action="store_true",
+                    help="use the A1* bin/ as it is. build.sh wipes bin/, which kills any other "
+                         "campaign running at the same time")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -308,19 +392,25 @@ def main():
           f"x {len(args.types)} types\n")
 
     if not args.skip_generate:
-        bin_dir = build()
+        check_mode(out, args.require_strict)
+        bin_dir = A1STAR / "bin" if args.no_build else build()
         generate(bin_dir, out, configs, args.types, args.seeds, args.instances,
-                 args.jobs, args.mu, args.pc, args.pm, args.k, lambdas, args.force)
+                 args.jobs, args.mu, args.pc, args.pm, args.k, lambdas, args.force,
+                 args.max_retries if args.require_strict else None)
 
     rows = collect(out, args.pm, lambdas)
-    if not rows:
+    missing = collect_unattained(out, args.pm, lambdas)
+    if not rows and not missing:
         raise SystemExit(f"no .kp under {out}")
-    csv_path = out / "features.csv"
-    with open(csv_path, "w", newline="", encoding="utf-8") as fh:
-        wr = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
-        wr.writeheader()
-        wr.writerows(rows)
-    print(f"\n{len(rows)} instances characterised -> {csv_path}")
+    if rows:
+        csv_path = out / "features.csv"
+        write_csv(csv_path, rows)
+        print(f"\n{len(rows)} instances characterised -> {csv_path}")
+    if missing or args.require_strict:
+        csv_path = out / "unattained.csv"
+        write_csv(csv_path, missing, ["file", "type", "n", "bits", "c", "alpha", "lambda_m",
+                                      "attempts"])
+        print(f"{len(missing)} instances unattained -> {csv_path}")
 
 
 if __name__ == "__main__":
