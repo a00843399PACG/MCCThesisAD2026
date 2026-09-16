@@ -240,6 +240,21 @@ own encoding formula $l_w=\lceil\log_2(w)-1\rceil$ does not match its Fig.~1 nor
 the figures here use the code (\evid{V1}).
 \end{remark}
 
+\begin{remark}[What is measured here is not the paper's corpus]\label{rem:notpapercorpus}
+Every instance analysed in this thesis was generated for it. None comes from the 2019 study,
+whose tailored instances are not distributed (the paper offers them ``upon request''), and no
+configuration of the design coincides with one of its configurations. The two studies also
+differ in size and in purpose: the paper reports $480$ instances in its preliminary stage,
+$38\,400$ generator runs in its tuning stage, $1\,600$ tailored instances plus $400$ for the
+hyper-heuristic and $200$ random ones in its advanced stage, and $100$ easy and $100$ hard
+instances per solver for two Pisinger configurations, all at $n\le100$; this thesis analyses
+$17\,712$ instances at $n$ from $50$ to $1\,000$, two coefficient widths and three capacity
+ratios, plus a held-out design and an engine sweep. Consequently no number of the paper is
+reproduced, contradicted or extended here as a number: what is compared is structural, which
+targets can be delivered, in which direction the asymmetry runs, and what bounds it, and the
+comparison is stated as such wherever it appears (Section~\ref{sec:prior}).
+\end{remark}
+
 % =====================================================================
 \section{Research questions, hypotheses and objectives}
 
@@ -1392,7 +1407,7 @@ T19 & $\bw=\bp$ throughout. & The bound depends on $\bp$ only; a design with $\b
 T20 & Profits that scale with $n$ would escape the bound. & True; H\ref{h:selection} is restricted to a fixed profit range, and the support boundary says so. & H\ref{h:selection} \\
 T21 & The budget experiment covers few cells and seeds. & H\ref{h:budget} is stated for exactly those cells and budgets. & H\ref{h:budget} \\
 T23 & The instances come neither from the code as received nor from the algorithm of the paper. & The one semantic change from the received code is named and justified (v2.1 ignores a rate its interface accepts and the paper applies); the differences from the paper are listed and classified as substantive or parametric; exact results hold for both, empirical ones are scoped to the adapted v2.1. & Def.~\ref{def:states} \\
-T22 & The 2019 study used other configurations and a differently described GA. & Its configurations are listed and located against the design; the difference between its steady-state, one-flip description and the shipped code is stated; its results are compared qualitatively only. & Sec.~\ref{sec:prior}, Remark~\ref{rem:paperconfigs} \\
+T22 & The 2019 study used other configurations, other corpus sizes and a differently described GA. & Its configurations, its instance counts and the fact that none of its instances is analysed here are stated (Rem.~\ref{rem:notpapercorpus}); its configurations are located against the design; the difference between its steady-state, one-flip description and the shipped code is stated; its results are compared qualitatively only. & Sec.~\ref{sec:prior}, Remark~\ref{rem:paperconfigs} \\
 \bottomrule
 \end{longtable}
 \end{center}
