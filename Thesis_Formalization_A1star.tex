@@ -18,7 +18,7 @@
 \usepackage{enumitem}
 \usepackage{caption}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
+\usetikzlibrary{arrows.meta,positioning,calc}
 \usepackage{tcolorbox}
 \tcbuselibrary{skins,breakable}
 \usepackage{xurl}
@@ -110,9 +110,14 @@ corpus the regret of always choosing \MAXPW\ falls from $2.9\%$ of the oracle va
 to below $0.01\%$ at $n=1000$, and a cost-sensitive selector trained on instance features
 recovers a fraction of an already negligible gap. The quantity that governs that value is not
 the number of items but the number that fit in the knapsack: the regret is below $2/m$ on
-every one of the $17\,440$ instances measured, and $m$ alone explains the mean regret of a
-configuration better than $n$ does, which turns the negative result into a design rule for
-anyone building a selection benchmark with this generator. The separation of the eight types in
+every one of the $18\,400$ instances measured ($17\,440$ of exploration and $960$ of a
+fixed-$m$ test), and $m$ alone explains the mean regret of a configuration better than $n$
+does, which turns the negative result into a design rule for
+anyone building a selection benchmark with this generator; a design that holds the number of
+packed items while $n$ moves by a decade is reported with its preregistered predictions scored
+as met or not met: the ordering in $m$ is met by a wide margin and the invariance in $n$ is
+missed narrowly (a factor of $2.7$ per decade of $n$ against $2.5$ predicted), so the number
+of packed items is the dominant quantity but not the only one. The separation of the eight types in
 feature space is shown to be a sampling effect of the feature map rather than a property
 that strengthens with $n$. Every claim is labelled exact or empirical; the empirical ones are
 tested in-sample, on a preregistered held-out design where seven of seven predictions written
@@ -145,22 +150,44 @@ established on $\Astar$.
 \end{definition}
 
 \paragraph{The artefact is not the algorithm of the paper.} $\Azero$, $\Aone$ and $\Astar$ all
-differ from the algorithm described in Plata-Gonz\'alez et al.\ (2019). Substantively: the
-paper describes steady-state replacement of the two worst individuals, while \code{KP.generate},
-the only entry point to the genetic algorithm in v2.1, hard-codes a generational loop, and
-the steady-state loop present in the library has no caller; the paper flips one random bit
-with probability $MR$, the code flips every bit with probability $p_m$, which is a different
-search regime at the shipped $p_m=0.1$ and only approximately a reparametrisation
-($p_m=MR/L$) in the paper's tuned range $MR\le0.02$; and the paper's encoding formula matches
-neither its figure nor the code, whose reachable coefficients exceed the declared bounds
-unless they are powers of two. At the level of parameters: $\Azero$ behaves as the paper
-with the crossover rate fixed at $1$, and the evaluation budget, $10^{5}$ in the code, is not
-reported. Whether v2.1 changed after publication or the paper describes the implementation
-that was run imprecisely cannot be decided from the artefact and the paper. The thesis
-therefore makes no claim about the software state that produced the published results;
-exact results (Sections~\ref{sec:artefact} and~\ref{sec:bound}) depend only on the heuristics
-and the profit range and hold for the paper's algorithm too, and empirical results are
-compared with the paper's only qualitatively.
+differ from the algorithm described in Plata-Gonz\'alez et al.\ (2019), and
+Table~\ref{tab:paper-vs-code} lists the differences component by component. Three are
+substantive (the decoding, the mutation operator and the replacement scheme); the rest are
+parametric ($\Azero$ behaves as the paper with the crossover rate fixed at $1$; the budget of
+$10^{5}$ evaluations is a constant of the code that the paper does not report). Whether v2.1
+changed after publication or the paper describes the implementation that was run imprecisely
+cannot be decided from the artefact and the paper. The thesis therefore makes no claim about
+the software state that produced the published results; exact results
+(Sections~\ref{sec:artefact} and~\ref{sec:bound}) depend only on the heuristics and the
+profit range and hold for the paper's algorithm too, and empirical results are compared with
+the paper's only qualitatively. Every entry in the code column of the table is read from the
+source of $\Astar$ (\evid{V1}); the paper column restates only what
+Section~\ref{sec:prior} attributes to the paper.
+
+\begin{center}\scriptsize
+\captionof{table}{The genetic algorithm as the 2019 paper describes it and as the shipped
+code runs it. ``Same'' means the thesis found no difference; ``not compared'' means the
+paper's description is not restated in this document.}\label{tab:paper-vs-code}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{3.1cm}@{}}
+\toprule
+Component & 2019 paper (as described) & Code v2.1, $\Aone$, $\Astar$ (\evid{V1}) & Bearing on the thesis \\
+\midrule
+\endhead
+Encoding & one bit block per item, $l_w=\lceil\log_2 w-1\rceil$ bits for the weight, likewise for the profit; the formula matches neither its Fig.~1 nor the code & $L=n(\bw+\bp)$ bits; each field read little-endian and \emph{plus one}, so coefficients lie in $\{1,\dots,2^{b}\}$ whatever $\Wmax,\Pmax$ (Prop.~\ref{prop:reach}, \ref{prop:dyadic}) & substantive: the reachable set and the bound $2^{\bp}$ are properties of the code's decoding \\
+Initial population & random & $\mu$ chromosomes with every bit uniform (\code{KPIndividual}) & same \\
+Fitness & the eight labelled objectives (and eight variance/paired ones) & \code{KPEvaluator}: $f_\tau$ of Def.~\ref{def:labelled}, four heuristics run on the decoded instance & same \\
+Parent selection & tournament & tournament of size $k$ drawn with replacement, winner copied (\code{TournamentSelector}) & same; $k=3$ in the campaign \\
+Crossover & one-point, applied at a crossover rate & one-point at a uniform cut; $\Azero$ swaps unconditionally and never reads the rate it accepts; $\Aone$ applies it with probability $p_c$ (the one semantic change) & parametric: $\Azero$ is the paper at rate $1$ \\
+Mutation & one random bit flipped with probability $MR$; $MR\in(0,0.02]$ tuned & every bit flipped independently with probability $p_m$ (\code{KPIndividual.mutate}); the shipped $p_m=0.1$ flips $0.1L$ bits per offspring & substantive: a different search regime at the shipped value; $p_m=MR/L$ only approximates the paper's regime in its tuned range, and the campaign holds $\lambda_m=p_mL$ instead \\
+Replacement & steady state: the two offspring replace the two worst & generational: \code{KP.evolve} calls the engine with \code{Type.GENERATIONAL}; the whole population is replaced each generation and the library's steady-state loop has no caller & substantive: the paper's loop is never run by v2.1 \\
+Elitism & not compared & the best individual ever evaluated is kept aside and returned; the population itself carries no elite & the emitted instance is the elite $\beta$ of Def.~\ref{def:object} \\
+Stopping rule & not reported & $10^{5}$ evaluations, hard-coded in \code{KP.evolve}; checked once per generation, so a run overshoots by at most $\mu$ (Prop.~\ref{prop:budget}) & parametric: $\Emax$ is a constant of the code \\
+Population size & tuned in the 2019 study (its Sec.~4.2; Appendix~C) & a parameter of \code{KP.generate}; $\mu=10$ in the campaign, even so that $\mu'=\mu$ & parametric; not re-tuned here \\
+Output & the best individual, decoded & \code{toKP()} of the elite, one file per instance, two instances per call from one master seed & same \\
+Locale, statics & not applicable & \code{Locale.US} fixed and configuration made an object in $\Astar$; no effect on any campaign of the thesis & instrument only \\
+\bottomrule
+\end{longtable}
+\end{center}
 
 \begin{definition}[Object of study]\label{def:object}
 Fix a configuration $\theta=(n,c,\Wmax,\Pmax)$, the engine parameters $(\mu,p_c,p_m,k)$,
@@ -226,7 +253,7 @@ Whenever big gaps are easy on one side (easy or hard) for a heuristic, they are 
 Easy and hard instances of each heuristic occupy separate regions of a PCA of the seven features; random instances sit near the origin. & Secs.~5.1, 5.3; Figs.~5, 6, 9, 11 & Not claimed as new. What is new is that the sharpening of those clusters with $n$ is the $n^{-1/2}$ concentration of the features, with the between-type distance shrinking, measured against uniform instances as a noise floor (H\ref{h:pca}). \\
 A trained hyper-heuristic closes more than $20\%$ of the gap between the best heuristic and an oracle; on instances evolved for it, it reaches $0.9994$ of the optimum while the oracle over single heuristics reaches $0.8473$. & Sec.~5.3.1; Fig.~12 & Not contradicted: at the paper's configuration ($n=40$, $C=25$, $\bp=7$) the window $2^{7}=128$ is a large share of the instance value. New: the gap any algorithm can open over \MAXPW\ is below $2^{\bp}$ on every instance (Cor.~\ref{cor:regret}), so at scale both the selection gap and the gain of combining heuristics vanish (H\ref{h:selection}). \\
 Difficulty is defined as the inability of a heuristic to reach the optimum, and is ``subjective''. & Sec.~5.3.1 & Nothing new is claimed about solver hardness; the thesis only records that the fitness contains no term for it (Prop.~\ref{prop:factor}). \\
-The GA is described as steady-state, replacing the two worst, with mutation flipping one random bit with probability $MR$; $MR\in(0,0.02]$ was tuned. & Secs.~2.4, 3, 3.1, 4.2 & The shipped code runs a generational loop with per-bit mutation (\evid{V1}); \code{KP.generate} hard-codes the generational loop and the library's steady-state loop has no caller, and switching it would still leave per-bit mutation; the tuned rates and the campaign's $\lambda_m$ therefore do not name the same regime, and results of the paper are compared with the thesis only qualitatively. \\
+The GA is described as steady-state, replacing the two worst, with mutation flipping one random bit with probability $MR$; $MR\in(0,0.02]$ was tuned. & Secs.~2.4, 3, 3.1, 4.2 & The shipped code runs a generational loop with per-bit mutation (\evid{V1}; Table~\ref{tab:paper-vs-code}), so the tuned rates and the campaign's $\lambda_m$ do not name the same regime, and results of the paper are compared with the thesis only qualitatively. \\
 \bottomrule
 \end{longtable}
 \end{center}
@@ -248,12 +275,11 @@ the figures here use the code (\evid{V1}).
 Every instance analysed in this thesis was generated for it. None comes from the 2019 study,
 whose tailored instances are not distributed (the paper offers them ``upon request''), and no
 configuration of the design coincides with one of its configurations. The two studies also
-differ in size and in purpose: the paper reports $480$ instances in its preliminary stage,
-$38\,400$ generator runs in its tuning stage, $1\,600$ tailored instances plus $400$ for the
-hyper-heuristic and $200$ random ones in its advanced stage, and $100$ easy and $100$ hard
-instances per solver for two Pisinger configurations, all at $n\le100$; this thesis analyses
-$17\,712$ instances at $n$ from $50$ to $1\,000$, two coefficient widths and three capacity
-ratios, plus a held-out design and an engine sweep. Consequently no number of the paper is
+differ in size and in purpose (Table~\ref{tab:counts}): the paper's corpora are all at
+$n\le100$ and its largest count is generator runs of a tuning stage, not a corpus; this
+thesis analyses $18\,672$ instances at $n$ from $50$ to $1\,000$, two coefficient widths,
+three capacity ratios, a held-out design, an engine sweep and a fixed-$m$ design.
+Consequently no number of the paper is
 reproduced, contradicted or extended here as a number: what is compared is structural, which
 targets can be delivered, in which direction the asymmetry runs, and what bounds it, and the
 comparison is stated as such wherever it appears (Section~\ref{sec:prior}).
@@ -281,7 +307,7 @@ feature map see of it?} How far apart are the eight types in the seven-feature s
 the feature map?
 \item\label{rq:selection} \emph{Is algorithm selection over the portfolio worth anything on
 what it emits?} How much does a perfect selector gain over the single best heuristic, and
-how does that gain depend on $n$?
+what governs that gain: the number of items, or the number that fit in the knapsack?
 \item\label{rq:support} \emph{What can a corpus produced by this generator support?} Which
 claims about heuristic selection, instance hardness and transfer are licensed by its output,
 and which are not?
@@ -300,27 +326,62 @@ said to be so, and every hypothesis is tested again on a held-out design whose p
 are written down before it is generated (Section~\ref{sec:prereg}).
 \end{plain}
 
-\begin{hypothesis}[Selection over the portfolio does not pay at scale]\label{h:selection}
+\begin{hypothesis}[Selection over the portfolio does not pay once a few dozen items fit]\label{h:selection}
 On the corpus the generator emits, the mean relative regret of the single best heuristic
 \MAXPW\ against the per-instance oracle,
 $\bar r_C=\operatorname{mean}_{I\in C}\,(v_{\mathrm{VBS}}(I)-v_{\MAXPW}(I))/v_{\mathrm{VBS}}(I)$,
-is below $1\%$ in every cell with $n\ge200$.
+is governed by the number of packed items $m$ and not by $n$:
+\begin{enumerate}[label=(\alph*),leftmargin=1.8em,itemsep=1pt]
+\item $\bar r_C<1\%$ in every cell whose mean $m$ is at least $32$, whatever $n$;
+\item at equal $m$, cells whose $n$ differ by a decade have $\bar r_C$ within a factor of
+$2.5$ of each other.
+\end{enumerate}
+The pointwise form $r(I)/v_{\mathrm{VBS}}(I)<2/m$ of Remark~\ref{rem:twoverm} is not a
+clause: by Corollary~\ref{cor:regret} it holds whenever the $m$ packed profits average at
+least $2^{\bp-1}$, which the ratio order makes likely, so it is checked on every campaign
+and not tested.
 \par\emph{Rests on} Corollary~\ref{cor:regret} (exact): the absolute regret of \MAXPW\ against
 any feasible solution is below $2^{\bp}$ on every reachable instance, so the relative regret
-is below $2^{\bp}/v_{\MAXPW}$, which shrinks as $1/n$ at fixed $\alpha$. The hypothesis is the
-empirical question of how much of that shrinking window the emitted corpus occupies.
-\par\emph{Decided by} metric (vi) per cell of $\mathcal S_2$, and on the held-out design.
-\emph{Refuted if} any cell with $n\ge200$ has $\bar r_C\ge1\%$.
+is below $2^{\bp}/v_{\MAXPW}$, and $v_{\MAXPW}$ is a sum of $m$ profits
+(Remark~\ref{rem:twoverm}). The hypothesis is the empirical question of how much of that
+window the emitted corpus occupies, and of whether $n$ adds anything to $m$.
+\par\emph{Decided by} metric (vi) per cell of $\mathcal S_2$, on the held-out design
+$\mathcal S_4$, on the engine sweep $\mathcal S_5$, and on the fixed-$m$ design $\mathcal S_6$
+(Definition~\ref{def:prereg-m}). \emph{Refuted if} any cell with mean $m\ge32$ has
+$\bar r_C\ge1\%$, or if (b) fails on a pair of $\mathcal S_6$ cells whose calibration
+prediction R8 is met.
 \emph{Holds for} the portfolio $\heur$ with profits in $\{1,\dots,2^{\bp}\}$ and $\bp$ not
 growing with $n$; it says nothing about portfolios without the ratio greedy or about
 generators whose profit range scales with $n$.
-\emph{Status (in-sample):} supported; the largest $\bar r_C$ at $n\ge200$ is $0.62\%$
-($n=200$, $\alpha=0.05$), and a cost-sensitive selector trained on $\Phi$ lowers the mean
-regret by at most $0.75$ percentage points at any $n$ (Section~\ref{sec:selection})
-\evid{V3}. The $1\%$ threshold was fixed before the per-cell table was computed.
-\emph{Out of sample:} supported on $\mathcal S_4$ (prediction R5: $\bar r_C$ of $0.062\%$,
-$0.005\%$, $0.0001\%$ and $0\%$) and at every engine setting of $\mathcal S_5$ ($\le0.66\%$ at
-$n=100$, $\le0.03\%$ at $n=500$, $0.0001\%$ at $n=1000$) \evid{V3}.
+\par\emph{Original form, and why it changed.} The hypothesis was first written in $n$:
+``$\bar r_C<1\%$ in every cell with $n\ge200$'', with the range $\alpha\in[0.05,0.5]$ of the
+$\mathcal S_2$ design implicit, since there $m\approx\alpha n\ge36$ at $n\ge200$. That form was
+supported in-sample, on $\mathcal S_4$ and on $\mathcal S_5$, and was refuted by the first cells
+of $\mathcal S_6$, whose capacities are set so that only about twenty items fit: at $n=300$,
+$\alpha=0.009$ ($m=25$) the cell has $\bar r_C=1.53\%$. The $m$-form above was written after
+those cells were seen; it is the form Section~\ref{sec:packed} had already argued for, and it
+is what $\mathcal S_6$ and its predictions R9 and R10 tested. Both forms are
+recorded so that a reader can see which was fitted to what.
+\emph{Status (in-sample):} (a) supported: every cell of $\mathcal S_2$ with mean $m\ge32$ has
+$\bar r_C\le0.79\%$ (largest at $n=50$, $\alpha=0.5$, $m=36$), the largest $\bar r_C$ at
+$n\ge200$ is $0.62\%$ ($n=200$, $\alpha=0.05$), and a cost-sensitive selector trained on
+$\Phi$ lowers the mean regret by at most $0.75$ percentage points at any $n$
+(Section~\ref{sec:selection}) \evid{V3}; the pointwise check holds in $17\,440$ of $17\,440$
+instances, with $\max_I(r/v)\,m=1.848$ (Section~\ref{sec:packed}). The $1\%$ threshold was
+fixed before the per-cell table was computed; the level $m\ge32$ was fixed after $\mathcal S_6$'s first cells
+were seen.
+\emph{Out of sample:} (a) supported on $\mathcal S_4$ (prediction R5: $\bar r_C$ of $0.062\%$,
+$0.005\%$, $0.0001\%$ and $0\%$), at every engine setting of $\mathcal S_5$ ($\le0.66\%$ at
+$n=100$, $\le0.03\%$ at $n=500$, $0.0001\%$ at $n=1000$) and in every cell of $\mathcal S_6$
+with mean $m\ge32$ ($\le0.73\%$) \evid{V3}; the pointwise check holds in every instance of
+$\mathcal S_6$ ($\max_I(r/v)\,m=1.07$). (b) \emph{refuted, narrowly}: on the calibrated
+triple of $\mathcal S_6$ ($m=58$, $57$ and $66$ at $n=100$, $300$ and $1000$) the mean
+relative regret is $0.29\%$, $0.13\%$ and $0.11\%$, a ratio of $2.7$ between the extremes
+against the $2.5$ predicted (R9 not met); the uncalibrated $m=20$ triple gives $2.6$. At
+fixed $m$, $n$ therefore still lowers the regret, by less than a factor of three per decade,
+against a factor of $6$ to $11$ for a threefold change of $m$ (R10) and more than two orders
+of magnitude across the design in $n$ alone: $m$ is the dominant quantity, not the only one
+(Section~\ref{sec:fixedm-results}).
 \end{hypothesis}
 
 Hypotheses~\ref{h:map} to~\ref{h:sign} are the pieces behind Hypothesis~\ref{h:selection}:
@@ -432,7 +493,7 @@ boundary of the claims its corpora can support.
 \item Establish $\Astar$ as an output-identical build of $\Aone$ and use it as the
 instrument of every measurement (\ref{rq:what}).
 \item Prove the structural propositions of the generator: reachable set, dyadic collapse,
-factorisation and integrality of the fitness, mirror identity, budget, and the bounded
+factorisation of the fitness, mirror identity, budget, and the bounded
 margin (\ref{rq:what}, \ref{rq:why}).
 \item Run a factorial campaign on the effective axes $(n,\bw,\alpha)$, measure
 $q_{\theta,\tau}$ per cell with exact binomial confidence bounds, and compare it with the
@@ -494,12 +555,12 @@ per-bit mutation at rate $p_m$, total replacement, external elite) for $\Emax=10
 evaluations.
 \end{definition}
 
-\begin{proposition}[Integrality and the meaning of zero]\label{prop:zero}
+\begin{remark}[Integrality and the meaning of zero]\label{prop:zero}
 Away from $v=\mathbf 0$ every labelled objective is an integer; $f_\tau(x)>0$ iff the target
 is the strict winner (\textsc{easy}) or strict loser (\textsc{hard}) on $\Gam(x)$, and then
 $f_\tau(x)\ge1$; $f_\tau(x)=0$ is an exact tie of the target with its best (worst)
 competitor. \evid{V1}
-\end{proposition}
+\end{remark}
 
 \begin{proposition}[Fitness factorisation]\label{prop:factor}
 Every labelled objective is a function of $v(x)$ alone: no term in the weight--profit
@@ -639,8 +700,11 @@ Corollary~\ref{cor:regret}(i) becomes
 This is not a theorem: the step from $v_{\MAXPW}$ to $m\,2^{\bp}/2$ is distributional, and on a
 corpus evolved to favour a heuristic the packed profits need not average the uniform mean. It
 is stated because it is the form a user can apply, and because it holds without exception on
-every campaign of this thesis: $r/v<2/m$ in $17\,440$ of $17\,440$ instances, with
-$\max_I (r(I)/v_{\mathrm{VBS}}(I))\,m=1.848$ \evid{V3} (Section~\ref{sec:packed}).
+every campaign of this thesis: $r/v<2/m$ in $17\,440$ of $17\,440$ exploration instances
+($\mathcal S_2$, $\mathcal S_4$, $\mathcal S_5$), with
+$\max_I (r(I)/v_{\mathrm{VBS}}(I))\,m=1.848$ \evid{V3} (Section~\ref{sec:packed}), and in
+every instance of the fixed-$m$ test $\mathcal S_6$ (Section~\ref{sec:fixedm-results}):
+$18\,400$ instances of exploration plus test.
 \end{remark}
 
 \begin{remark}[Why the window closes with $n$]\label{rem:window}
@@ -703,7 +767,7 @@ No set is split into training and test, because nothing is trained.
 \end{plain}
 
 \begin{definition}[Instance sets]\label{def:sets}
-Let $\mathcal S_1,\dots,\mathcal S_5$ be the multisets of instances
+Let $\mathcal S_1,\dots,\mathcal S_6$ be the multisets of instances
 $\Gam(\beta)$ emitted by $\Astar$ under the following designs, each instance carrying the
 tuple $(\theta,\tau,s,j)$ that produced it (configuration, type, seed, index within the
 call).
@@ -734,34 +798,20 @@ $\Gtt(\cdot\mid W_\tau)$ is already sampled by the strict instances of $\mathcal
 unattained rate is predicted by Proposition~\ref{prop:conditional}, so no result of the thesis
 depends on it. The name is kept because the preregistration of Definition~\ref{def:prereg}
 refers to $\mathcal S_4$.
-\item \emph{Held-out design} $\mathcal S_4$: $n\in\{300,700\}$, $b=12$,
-$\alpha\in\{0.15,0.40\}$, none of which occurs in $\mathcal S_2$; otherwise as $\mathcal S_2$.
-$|\mathcal S_4|=1\,920$. Generated only after the predictions of Section~\ref{sec:prereg} are
-committed.
-\item \emph{Engine sweep} $\mathcal S_5$: $n\in\{100,500\}$, $b=10$, $\alpha=0.25$, the eight
-types, $10$ seeds, $2$ instances per call, at three engine settings: $\lambda_m\in\{3,33\}$
-with $\mu=10$, and $\mu=30$ with $\lambda_m=11$; plus one cell at $n=1000$ with
-$\lambda_m=3$, on the seeds $\mathcal S_2$ used there. $|\mathcal S_5|=1\,120$.
-\item \emph{Strict corpus} $\mathcal S_3$, \emph{partial}: the design of $\mathcal S_2$ run
-through the driver with \code{--require-strict} and $r_{\max}=10$, executed for the first two
-seeds of every cell and a few runs of the third ($2$ to $6$ attempts per cell, $4$ in $220$
-of the $240$ cells); an attempt ends either as a file with $f_\tau>0$ or as an
-\emph{unattained} record. $976$ attempts: $780$ files and $196$ unattained records. The full
-design ($14\,400$ attempts, about a week of computation) is not part of the thesis: its law
-$\Gtt(\cdot\mid W_\tau)$ is already sampled by the strict instances of $\mathcal S_2$, and its
-unattained rate is predicted by Proposition~\ref{prop:conditional} from $\hat q$ of
-$\mathcal S_2$; the partial run checks that prediction.
+\item \emph{Fixed-$m$ design} $\mathcal S_6$: $b=10$, the eight types, $10$ seeds, $2$
+instances per call, six cells that target $m\in\{20,60\}$ packed items at
+$n\in\{100,300,1000\}$ with the capacities of Definition~\ref{def:prereg-m}; otherwise as
+$\mathcal S_2$. $|\mathcal S_6|=960$. Generated only after the predictions R8--R11 are
+committed (\code{3e199a4}).
 \end{enumerate}
-\emph{Provenance.} $\mathcal S_1$ was recorded from $\Aone$; $\mathcal S_2$, $\mathcal S_4$ and $\mathcal S_5$
-are generated by $\Astar$, one JVM per run, under a dot-decimal locale; all are therefore
+\emph{Provenance.} $\mathcal S_1$ was recorded from $\Aone$; $\mathcal S_2$, $\mathcal S_4$,
+$\mathcal S_5$ and $\mathcal S_6$ are generated by $\Astar$, one JVM per run, under a dot-decimal locale; all are therefore
 outputs of v2.1 with the crossover guard as its only semantic change
 (Definition~\ref{def:states}), and none is an output of the algorithm described in the paper.
-The instances analysed in the thesis are the $272$ labelled files of $\mathcal S_1$, the
-$14\,400$ of $\mathcal S_2$, the $1\,920$ of $\mathcal S_4$ and the $1\,120$ of $\mathcal S_5$:
-$17\,712$.
+The counts per set, and how many of each enter the analyses, are in Table~\ref{tab:counts}.
 The uniform surrogate $\Utheta$ (Definition of Section~\ref{sec:artefact}: independent
 uniform draws on the reachable set) is not an instance set but the reference law against
-which the three sets are read; it is sampled by Monte Carlo where needed.
+which the sets are read; it is sampled by Monte Carlo where needed.
 \end{definition}
 
 \begin{remark}[What each set answers]
@@ -772,10 +822,38 @@ attainability map, the ties, the selection regret and the feature-space geometry
 instances are draws from $\Gtt(\cdot\mid W_\tau)$, the law $\mathcal S_3$ would have sampled.
 $\mathcal S_4$ tests whether the
 in-sample findings predict cells the analysis has never seen; $\mathcal S_5$ tests whether
-they survive a change of the engine setting. The two instances of a call come from
+they survive a change of the engine setting; $\mathcal S_6$ holds the number of packed items
+while $n$ moves, to separate $m$ from $n$ as the quantity that governs the value of selection. The two instances of a call come from
 independent runs of the engine with seeds drawn from the call's master stream; every
 cross-validation over instances groups them by call.
 \end{remark}
+
+\begin{center}\scriptsize
+\captionof{table}{How many instances each set holds, how many enter the analyses, and, for
+comparison, the corpus sizes the 2019 paper reports. A cell is one $(\theta,\tau)$ pair, or one
+$(\theta,\tau,\text{setting})$ triple in $\mathcal S_5$.}\label{tab:counts}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.9cm}rrrr>{\raggedright\arraybackslash}p{3.3cm}@{}}
+\toprule
+Set & Design & cells & per cell & emitted & analysed & status \\
+\midrule
+$\mathcal S_1$ & golden grid: $4$ configurations, $16$ types & $64$ & $4$--$10$ & $544$ & $272$ & recorded from $\Aone$; the labelled files are analysed \\
+$\mathcal S_2$ & campaign: $30$ configurations, $8$ types & $240$ & $60$ & $14\,400$ & $14\,400$ & done \\
+$\mathcal S_3$ & strict corpus: the design of $\mathcal S_2$ & $240$ & $60$ & $0$ & $0$ & designed, not executed \\
+$\mathcal S_4$ & held-out: $4$ configurations, $8$ types & $32$ & $60$ & $1\,920$ & $1\,920$ & done, after \code{be8b79e} \\
+$\mathcal S_5$ & engine sweep: $2$ configurations $\times$ $3$ settings, plus one cell at $n=1000$ & $56$ & $20$ & $1\,120$ & $1\,120$ & done \\
+$\mathcal S_6$ & fixed-$m$: $6$ configurations, $8$ types & $48$ & $20$ & $960$ & $960$ & done, after \code{3e199a4} \\
+\midrule
+total & & $680$ & & $18\,944$ & $18\,672$ & \\
+\midrule
+\multicolumn{7}{@{}l}{\emph{The 2019 paper, for comparison; none of its instances is analysed here (Remark~\ref{rem:notpapercorpus})}} \\
+prelim. & $n=20$, $C=50$ & & & $480$ & $0$ & \\
+tuning & $n=40$, $C=25$; generator runs, not a corpus & & & $38\,400$ & $0$ & \\
+advanced & $n=40$, $C=25$; tailored $+$ hyper-heuristic $+$ random & & & $1\,600+400+200$ & $0$ & \\
+Pisinger & two configurations; $100$ easy and $100$ hard per heuristic & & & $200$ per heuristic and configuration & $0$ & \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \subsection{Performance metrics}\label{sec:metrics}
 
@@ -846,44 +924,46 @@ decided in the phase where its deciding quantity is measured.
 
 \begin{center}
 \begin{tikzpicture}[
-  every node/.style={font=\scriptsize, align=center},
-  ph/.style={draw=ink!70, fill=pGray, rounded corners=3pt, minimum width=2.4cm, minimum height=0.8cm, font=\small\bfseries},
-  what/.style={draw=ink!40, fill=white, rounded corners=2pt, text width=3.1cm, minimum height=0.8cm},
-  run/.style={draw=ink!40, fill=#1, rounded corners=2pt, text width=5.6cm, inner sep=2.5pt, anchor=west, align=left},
-  arr/.style={-{Stealth[length=1.6mm]}, color=inkSoft}]
-\node[ph] (p) at (0,0) {Preliminary};
-\node[ph] (c) at (0,-3.6) {Confirmatory};
-\node[ph] (a) at (0,-7.8) {Advanced};
+  every node/.style={font=\scriptsize},
+  ph/.style={draw=ink!70, fill=pGray, rounded corners=3pt, minimum width=2.4cm, minimum height=0.8cm, font=\small\bfseries, align=center},
+  what/.style={draw=ink!40, fill=white, rounded corners=2pt, text width=2.9cm, minimum height=0.8cm, align=center},
+  run/.style={draw=ink!40, fill=#1, rounded corners=2pt, text width=8.4cm, inner sep=2.5pt, align=left},
+  arr/.style={-{Stealth[length=1.6mm]}, color=inkSoft},
+  node distance=3pt]
+% preliminary phase
+\node[run=pGreen] (p1) at (0,0) {P1 golden grid: $\Astar$ reproduces $\mathcal S_1$, $544/544$};
+\node[run=pGreen, below=of p1] (p2) {P2 independent heuristics agree on $57\,600$ values};
+\node[run=pGreen, below=of p2] (p3) {P3 Monte Carlo of $\Utheta$ on the golden configurations};
+\node[run=pGreen, below=of p3] (p4) {P4 harness pilot; seeded starts sit at $f_\tau=0$};
+\node[run=pGreen, below=of p4] (p5) {P5 predictions for $\mathcal S_4$ committed (\code{be8b79e})};
+% confirmatory phase
+\node[run=pGreen, below=16pt of p5] (c1) {C1 attainability map on $\mathcal S_2$};
+\node[run=pGreen, below=of c1] (c2) {C2 ties, and the sign under reversed tie-break};
+\node[run=pGreen, below=of c2] (c4) {C4 feature separation: noise floor and centroids};
+\node[run=pGreen, below=of c4] (c5) {C5 selection regret and closed gap};
+\node[run=pGreen, below=of c5] (c6) {C6 held-out $\mathcal S_4$: R1--R7 met};
+% advanced phase
+\node[run=pGreen, below=16pt of c6] (a1) {A1 trajectory of the best fitness to $10^{5}$};
+\node[run=pGreen, below=of a1] (a2) {A2 budget: the same runs to $10^{6}$};
+\node[run=pGreen, below=of a2] (a3) {A3 seeded start on the tie boundary};
+\node[run=pGreen, below=of a3] (a4) {A4 pooled geometry over all configurations};
+\node[run=pGreen, below=of a4] (a5) {A5 engine sweep $\mathcal S_5$: $\lambda_m$ and $\mu$};
+\node[run=pGreen, below=of a5] (a6) {A6 feature-map swap: the generator's four features};
+\node[run=pGreen, below=of a6] (a7) {A7 regret against the number of packed items};
+\node[run=pGreen, below=of a7] (a8) {A8 fixed-$m$ design $\mathcal S_6$: R10, R11 met; R9 not met (R8--R11)};
+\node[font=\tiny, text=inkSoft, below=2pt of a8.south west, anchor=north west] {green: done};
+% phase boxes, centred on their groups
+\node[ph] (p) at ($(p1.west)!0.5!(p5.west)+(-6.6cm,0)$) {Preliminary};
+\node[ph] (c) at ($(c1.west)!0.5!(c6.west)+(-6.6cm,0)$) {Confirmatory};
+\node[ph] (a) at ($(a1.west)!0.5!(a8.west)+(-6.6cm,0)$) {Advanced};
 \draw[arr] (p) -- (c); \draw[arr] (c) -- (a);
 \node[what, right=0.35cm of p] (pw) {Fast runs that validate the instruments};
 \node[what, right=0.35cm of c] (cw) {Long runs that establish the characterisation};
 \node[what, right=0.35cm of a] (aw) {Runs under changed conditions};
 \draw[arr] (p) -- (pw); \draw[arr] (c) -- (cw); \draw[arr] (a) -- (aw);
-\foreach \y/\col/\txt in {
-  1.2/pGreen/{P1 golden grid: $\Astar$ reproduces $\mathcal S_1$, $544/544$},
-  0.6/pGreen/{P2 independent heuristics agree on $57\,600$ values},
-  0.0/pGreen/{P3 Monte Carlo of $\Utheta$ on the golden configurations},
-  -0.6/pGreen/{P4 harness pilot; seeded starts sit at $f_\tau=0$},
-  -1.2/pGreen/{P5 predictions for $\mathcal S_4$ committed (\code{be8b79e})}}{
-  \node[run=\col] (n) at (6.6,\y) {\txt}; \draw[arr] (pw.east) -- (n.west);}
-\foreach \y/\col/\txt in {
-  -2.1/pGreen/{C1 attainability map on $\mathcal S_2$},
-  -2.7/pGreen/{C2 ties, and the sign under reversed tie-break},
-  -3.9/pGreen/{C4 feature separation: noise floor and centroids},
-  -4.5/pGreen/{C5 selection regret and closed gap},
-  -5.1/pGreen/{C6 held-out $\mathcal S_4$: R1--R7 met}}{
-  \node[run=\col] (n) at (6.6,\y) {\txt}; \draw[arr] (cw.east) -- (n.west);}
-\foreach \y/\col/\txt in {
-  -6.3/pGreen/{A1 trajectory of the best fitness to $10^{5}$},
-  -6.9/pGreen/{A2 budget: the same runs to $10^{6}$},
-  -7.5/pGreen/{A3 seeded start on the tie boundary},
-  -8.1/pGreen/{A4 pooled geometry over all configurations},
-  -8.7/pGreen/{A5 engine sweep $\mathcal S_5$: $\lambda_m$ and $\mu$},
-  -9.3/pGreen/{A6 feature-map swap: the generator's four features},
-  -9.9/pGreen/{A7 regret against the number of packed items},
-  -10.5/pYellow/{A8 fixed-$m$ design $\mathcal S_6$: R8--R11}}{
-  \node[run=\col] (n) at (6.6,\y) {\txt}; \draw[arr] (aw.east) -- (n.west);}
-\node[font=\tiny, text=inkSoft, anchor=west] at (6.6,-11.1) {green: done; yellow: running or planned};
+\foreach \x in {p1,p2,p3,p4,p5} {\draw[arr] (pw.east) -- (\x.west);}
+\foreach \x in {c1,c2,c4,c5,c6} {\draw[arr] (cw.east) -- (\x.west);}
+\foreach \x in {a1,a2,a3,a4,a5,a6,a7,a8} {\draw[arr] (aw.east) -- (\x.west);}
 \end{tikzpicture}
 \captionof{figure}{Experimental methodology. Each phase feeds the next: the instruments
 validated in the first are the ones the second measures with, the predictions written in the
@@ -917,7 +997,7 @@ A4 & Pooled geometry & $\mathcal S_2$ & (v) pooled & descriptive & done \\
 A5 & Engine sweep & $\mathcal S_5$ & (ii), (vi) & reach of H\ref{h:selection}, H\ref{h:map} & done: H\ref{h:map}(c) is setting-dependent at $n=500$ \\
 A6 & Feature-map swap & $\mathcal S_2$, four generator features & (v), (vi) & H\ref{h:pca} & done \\
 A7 & Regret against packed items & all campaigns, $17\,440$ instances & (vi) against $m$ & exploratory & done \\
-A8 & Fixed-$m$ design & $\mathcal S_6$, $960$ instances & (vi) at fixed $m$ & R8--R11 (Def.~\ref{def:prereg-m}) & predictions committed; running \\
+A8 & Fixed-$m$ design & $\mathcal S_6$, $960$ instances & (vi) at fixed $m$ & R8--R11 (Def.~\ref{def:prereg-m}); H\ref{h:selection}(b) & done: R10, R11 met; R9 not met ($2.7$ vs $2.5$); R8 met at $m=60$, not at $m=20$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1082,7 +1162,6 @@ mean relative regret, $\alpha=0.05$ & $6.5\%$ & $2.1\%$ & $0.62\%$ & $0.074\%$ &
 \quad $\alpha=0.25$ & $1.4\%$ & $0.41\%$ & $0.094\%$ & $0.0002\%$ & $0$ \\
 \quad $\alpha=0.50$ & $0.75\%$ & $0.24\%$ & $0.046\%$ & $0.0001\%$ & $0$ \\
 maximum relative regret, $\alpha=0.05$ & $24\%$ & $10\%$ & $2.7\%$ & $0.8\%$ & $0.3\%$ \\
-\MAXPW\ is the oracle's choice & $47\%$ & $56\%$ & $69\%$ & $95\%$ & $97\%$ \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1152,16 +1231,17 @@ $>256$ & $3\,966$ & $1.1\%$ & $0.00\%$ & $0.11\%$ \\
 \end{tabular}
 \end{center}
 
-Three findings. First, the bound of Remark~\ref{rem:twoverm} holds everywhere, with the
-tightest instance at $1.85$ of the allowed $2$. Second, the mean regret falls much faster than
-that bound: regressing the log mean regret of a cell on $\log m$ and $\log n$ over the $33$
+The check first: the bound of Remark~\ref{rem:twoverm} holds everywhere, with the tightest
+instance at $1.85$ of the allowed $2$, as the corollary makes it almost certain to. Two
+findings. First, the mean regret falls much faster than that bound: regressing the log mean regret of a cell on $\log m$ and $\log n$ over the $33$
 cells with a positive mean gives $-2.87$ for $m$ and $-0.42$ for $n$ ($R^{2}=0.833$), and $m$
 alone explains $R^{2}=0.829$ against $0.652$ for $n$ alone; the extra decay comes from the
 share of instances on which any heuristic beats \MAXPW\ at all, which collapses from $79\%$ to
-$1\%$ independently of how large the remaining gaps are. Third, among cells that share $m$
+$1\%$ independently of how large the remaining gaps are. Second, among cells that share $m$
 within $20\%$ while $n$ differs by a factor of $2$ to $5$, the median ratio of mean regret is
 $0.72$: at equal $m$, a fivefold $n$ changes the regret by less than a third, against the four
-orders of magnitude it varies across the design. The controlling quantity is $m$, not $n$.
+orders of magnitude it varies across the design. On the exploration campaigns the controlling quantity is $m$; whether $n$ adds anything at
+fixed $m$ is what $\mathcal S_6$ decides.
 
 Since $m\approx\alpha n$ under $\Utheta$, this turns the negative result into a design rule:
 \emph{with this portfolio, algorithm selection is worth something only where few items fit},
@@ -1171,11 +1251,15 @@ its corpora: its main configuration packs about $1.5$ items
 mean regret of $9.9\%$ and a maximum of $24\%$, the range in which its hyper-heuristic result
 sits.
 
-\paragraph{Status of this finding.} It is exploratory and observational: $m$ was not
-manipulated at fixed everything else, but varied through $n$ and $\alpha$, and the analysis
-was run after the campaigns. The matched-$m$ pairs are the nearest thing to a controlled
-comparison. The design of Definition~\ref{def:prereg-m} settles it by holding $m$ and moving
-$n$ over a decade, with its predictions committed before the cells were generated.
+\paragraph{Status of this finding.} On the exploration campaigns it is observational: $m$ was
+not manipulated at fixed everything else, but varied through $n$ and $\alpha$, and the
+analysis was run after the campaigns. The design of Definition~\ref{def:prereg-m} was
+written to settle it by holding $m$ and moving $n$ over a decade, with its predictions
+committed before the cells were generated. Its outcome (Section~\ref{sec:fixedm-results})
+is that $m$ is the dominant quantity but not the only one: at fixed $m$ a decade of $n$
+still lowers the mean regret by a factor of $2.7$, narrowly above the $2.5$ the design
+allowed, so by the rule written into the definition the finding is downgraded from
+``$m$, not $n$'' to ``$m$ first, $n$ second''.
 
 \begin{definition}[The fixed-$m$ design $\mathcal S_6$ and its predictions]\label{def:prereg-m}
 $\mathcal S_6$ holds the number of packed items while $n$ moves by a factor of ten:
@@ -1396,6 +1480,73 @@ $\alpha=0.15$; $4/60$ at $\alpha=0.40$; $2/60$ and $0/60$ at $n=700$), and $\mat
 has no pair tie at all, consistent with $n\ge300$ and $b=12$.
 
 % =====================================================================
+\section{The fixed-$m$ design}\label{sec:fixedm-results}
+
+\begin{plain}{what this is}
+The design of Definition~\ref{def:prereg-m} holds the number of packed items at about $20$
+and at about $60$ while $n$ goes from $100$ to $1000$, so that the regret can be read at
+fixed $m$ across a decade of $n$. Its capacities were computed from a fit to the campaign;
+the fit missed at the tightest capacities, so only the $m=60$ triple is the controlled
+comparison the design was for. On that triple the ordering in $m$ is met by a wide margin
+and the invariance in $n$ is missed narrowly. Every prediction is scored as it was written.
+\end{plain}
+
+$\mathcal S_6$, $960$ instances, generated after commit \code{3e199a4}
+(\code{tools/fixed_m_s6.sh}, \code{runs/fixed_m_s6}, scoring in
+\code{runs/fixed_m_s6/scoring.csv}):
+
+\begin{center}\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrlrrrr@{}}
+\toprule
+cell & $N$ & target $m$ & mean $m$ & R8 & share $r>0$ & mean $r/v$ & max $r/v$ & $\max (r/v)\,m$ \\
+\midrule
+$n=100$, $c=2\,723$   & $160$ & $20$ & $21.0$ & met ($+5\%$)      & $42.5\%$ & $1.87\%$ & $7.1\%$ & $1.07$ \\
+$n=300$, $c=1\,386$   & $160$ & $20$ & $25.2$ & not met ($+26\%$) & $38.1\%$ & $1.53\%$ & $8.6\%$ & $1.06$ \\
+$n=1000$, $c=661$     & $160$ & $20$ & $36.5$ & not met ($+83\%$) & $28.8\%$ & $0.73\%$ & $5.1\%$ & $1.04$ \\
+\addlinespace[2pt]
+$n=100$, $c=18\,501$  & $160$ & $60$ & $58.3$ & met ($-3\%$)      & $36.9\%$ & $0.29\%$ & $1.5\%$ & $0.86$ \\
+$n=300$, $c=9\,417$   & $160$ & $60$ & $57.4$ & met ($-4\%$)      & $13.8\%$ & $0.13\%$ & $1.3\%$ & $0.95$ \\
+$n=1000$, $c=4\,493$  & $160$ & $60$ & $66.3$ & met ($+11\%$)     & $12.5\%$ & $0.11\%$ & $1.1\%$ & $0.92$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+\item \emph{R8 (calibration): met in the three $m=60$ cells, not met in two of the three
+$m=20$ cells.} The fit $\log m=-3.163+0.573\log c+0.352\log n$ was estimated on
+$\alpha\in[0.05,0.5]$ and does not extrapolate below it: at $n=1000$ a capacity of $661$
+($\alpha=0.0013$) holds $36.5$ items, not $20$, because with a thousand items to choose from
+the ratio order fills the knapsack with the lightest high-ratio items, whose mean weight is
+far below the uniform mean the fit implicitly carries. The $n=300$ cell misses the $25\%$
+tolerance by $0.8$ points.
+\item \emph{R9 (invariance at fixed $m$): not met.} On the calibrated $m=60$ triple the mean
+regret is $0.29\%$, $0.13\%$ and $0.11\%$: a ratio of $2.72$ between the extremes against
+the $2.5$ predicted. The $m=20$ triple gives $2.56$, but it is not at fixed $m$ and does not
+count. Most of the change at $m=60$ happens between $n=100$ and $n=300$ (a factor of $2.2$)
+and comes from the share of instances on which any heuristic beats \MAXPW\ at all, which
+falls from $37\%$ to $14\%$; from $n=300$ to $n=1000$ the ratio is $1.25$.
+\item \emph{R10 (ordering in $m$): met.} At every $n$ the mean regret at $m\approx20$ is
+$6.4$, $11.4$ and $6.8$ times that at $m\approx60$, against the factor of $3$ predicted.
+\item \emph{R11 (bound, a check of Remark~\ref{rem:twoverm}): met} in every instance,
+$\max(r/v)\,m=1.07$ of the allowed $2$.
+\end{itemize}
+
+\paragraph{Consequence.} The scoring stands as reported; none of the predictions is revised.
+Definition~\ref{def:prereg-m} said in advance what a failed R9 with a met R10 would mean:
+$n$ matters at fixed $m$ after all, and the finding of Section~\ref{sec:packed} is
+downgraded from a controlling quantity to a correlation with a dominant axis. The sizes
+are what matter for the reader: at fixed $m$ a decade of $n$ changes the regret by a factor
+of $2.7$; a threefold change of $m$ at fixed $n$ changes it by $6$ to $11$; across the
+design, $n$ alone spans more than two orders of magnitude only because $m$ moves with it.
+The design rule of Section~\ref{sec:packed} therefore survives in a weaker form: with this
+portfolio, selection is worth something only where few items fit, and at a given number of
+packed items, larger instances make it worth slightly less. What the design did not deliver
+is the same comparison at $m\approx20$; a recalibrated triple, with capacities chosen by a
+short pilot at each $n$ and predictions committed again before generation, would show
+whether the residual effect of $n$ is the same at small $m$. It is optional: the question the
+design was written for is answered.
+
+% =====================================================================
 \section{Reach over the engine setting}\label{sec:sweep-results}
 
 \begin{plain}{what this asks}
@@ -1473,7 +1624,7 @@ T12 & The label depends on how ties among items are broken. & Measured: the sign
 \multicolumn{4}{@{}l}{\emph{Statistical conclusion validity}} \\
 T13 & $60$ instances per cell is too few. & Exact Clopper--Pearson bounds are reported; $\hat q=0$ means $q<0.049$ and $\hat q=1$ means $q>0.951$. & Remark on decision rules \\
 T14 & $240$ cells invite false discoveries. & Hypotheses are aggregate; per-cell tables are descriptive and carry no significance claims. & Remark on decision rules \\
-T15 & Hypotheses and thresholds were fitted to the data (HARKing). & Thresholds fixed afterwards are marked; the four empirical hypotheses are re-tested on a preregistered held-out design with predictions committed before generation; H\ref{h:sign}'s threshold was set before measuring and the hypothesis was refuted. & Sec.~\ref{sec:prereg} \\
+T15 & Hypotheses and thresholds were fitted to the data (HARKing). & Thresholds fixed afterwards are marked; the four empirical hypotheses are re-tested on a preregistered held-out design with predictions committed before generation; H\ref{h:sign}'s threshold was set before measuring and the hypothesis was refuted; H\ref{h:selection} was restated in $m$ after the first cells of $\mathcal S_6$ refuted its $n$-form, and both forms are recorded in the hypothesis. & Sec.~\ref{sec:prereg}, H\ref{h:selection} \\
 \addlinespace[3pt]
 \multicolumn{4}{@{}l}{\emph{External validity: how far do the results reach?}} \\
 T16 & The results hold only at $\mu=10$, $\lambda_m=11$, $k=3$, $p_c=0.8$. & Exact claims do not depend on the engine; empirical claims are labelled with their setting and re-tested at $\lambda_m\in\{3,33\}$ and $\mu=30$. & Sec.~1, A5 \\
@@ -1482,8 +1633,8 @@ T18 & Thirty configurations do not cover the space. & Held-out $n$, $b$ and $\al
 T19 & $\bw=\bp$ throughout. & The bound depends on $\bp$ only; a design with $\bw\ne\bp$ needs a driver change and is recorded as a limitation. & Sec.~\ref{sec:support} \\
 T20 & Profits that scale with $n$ would escape the bound. & True; H\ref{h:selection} is restricted to a fixed profit range, and the support boundary says so. & H\ref{h:selection} \\
 T21 & The budget experiment covers few cells and seeds. & H\ref{h:budget} is stated for exactly those cells and budgets. & H\ref{h:budget} \\
-T23 & The instances come neither from the code as received nor from the algorithm of the paper. & The one semantic change from the received code is named and justified (v2.1 ignores a rate its interface accepts and the paper applies); the differences from the paper are listed and classified as substantive or parametric; exact results hold for both, empirical ones are scoped to the adapted v2.1. & Def.~\ref{def:states} \\
-T22 & The 2019 study used other configurations, other corpus sizes and a differently described GA. & Its configurations, its instance counts and the fact that none of its instances is analysed here are stated (Rem.~\ref{rem:notpapercorpus}); its configurations are located against the design; the difference between its steady-state, one-flip description and the shipped code is stated; its results are compared qualitatively only. & Sec.~\ref{sec:prior}, Remark~\ref{rem:paperconfigs} \\
+T23 & The instances come neither from the code as received nor from the algorithm of the paper. & The one semantic change from the received code is named and justified (v2.1 ignores a rate its interface accepts and the paper applies); the differences from the paper are listed and classified as substantive or parametric; exact results hold for both, empirical ones are scoped to the adapted v2.1. & Def.~\ref{def:states}, Table~\ref{tab:paper-vs-code} \\
+T22 & The 2019 study used other configurations, other corpus sizes and a differently described GA. & Its configurations, its instance counts and the fact that none of its instances is analysed here are stated (Rem.~\ref{rem:notpapercorpus}); its configurations are located against the design; the difference between its steady-state, one-flip description and the shipped code is stated; its results are compared qualitatively only; the corpus sizes of both studies are in Table~\ref{tab:counts}. & Sec.~\ref{sec:prior}, Table~\ref{tab:paper-vs-code}, Remark~\ref{rem:paperconfigs}, Table~\ref{tab:counts} \\
 \bottomrule
 \end{longtable}
 \end{center}
@@ -1507,8 +1658,8 @@ A corpus filtered by \code{--require-strict} is a sample of $\Gtt$ & not support
 Margins of the bounded types can be made large by a longer search & not supported & Prop.~\ref{prop:bound}: $f_\tau<2^{\bp}$ \\
 ``Hard'' instances are hard for an exact solver (a reading the 2019 paper does not make, but its comparison with Pisinger's hard sets invites) & not supported & Prop.~\ref{prop:factor}: no hardness term in $f_\tau$ \\
 Combining heuristics during construction pays at scale & not supported: bounded by $2^{\bp}$ over \MAXPW\ on every instance & Cor.~\ref{cor:regret}(ii); the paper's $15\%$ is at $n=40$ with one or two items packed \\
-The value of selection is governed by the number of packed items, not by $n$ & supported, exploratory pending A8: $m$ alone explains $R^{2}=0.829$ of the mean regret across cells against $0.652$ for $n$; at equal $m$ a fivefold $n$ changes it by $0.72\times$ & Sec.~\ref{sec:packed} \\
-Algorithm selection over $\heur$ pays on this corpus & supported at $n\le100$ in relative terms ($0.9$--$2.9\%$ mean, a trained selector recovering a quarter to a third); not supported at $n\ge200$ & Cor.~\ref{cor:regret}; H\ref{h:selection}; Sec.~\ref{sec:selection} \\
+The value of selection is governed by the number of packed items, not by $n$ & supported as dominance, not as exclusivity: $m$ alone explains $R^{2}=0.829$ of the mean regret across cells against $0.652$ for $n$; on the preregistered fixed-$m$ design a threefold $m$ changes the regret $6$--$11\times$ (R10 met) while a decade of $n$ at fixed $m$ changes it $2.7\times$ (R9 not met, $2.5$ predicted) & Sec.~\ref{sec:packed}, \ref{sec:fixedm-results} \\
+Algorithm selection over $\heur$ pays on this corpus & supported where few items fit: $0.9$--$2.9\%$ mean regret at $m\le25$ (a trained selector recovering a quarter to a third); not supported once $m\ge32$ ($<0.8\%$ in every cell, $0$ at $m>300$), whatever $n$ & Cor.~\ref{cor:regret}; H\ref{h:selection}; Secs.~\ref{sec:selection}, \ref{sec:packed} \\
 Any algorithm, with profits in $\{1,\dots,2^{\bp}\}$, gains $2^{\bp}$ or more over \MAXPW\ on some instance & not supported, exactly & Cor.~\ref{cor:regret}(ii) \\
 A generator whose profit range grows with $n$ is bound the same way & not addressed & outside the scope (T20) \\
 Within a configuration the types occupy distinct regions of $\Phi$ & supported, with overlaps listed & Sec.~\ref{sec:pca} \\
@@ -1556,8 +1707,9 @@ feature-space geometry with its signal/noise split (Section~\ref{sec:pca}); the
 preregistered held-out test (Section~\ref{sec:prereg}). \emph{From today's analyses and the
 notebook's feature map.}
 \item \textbf{Diagnosis, robustness and support boundary.} A1--A3 and the decision on
-Hypothesis~\ref{h:budget} (not budget-sufficient within $10\times$, start-limited); the engine sweep A5 and the feature-map swap A6; threats to
-validity (Section~\ref{sec:threats}); the support-boundary table; conclusions.
+Hypothesis~\ref{h:budget} (not budget-sufficient within $10\times$, start-limited); the engine sweep A5 and the feature-map swap A6; the
+packed-items analysis A7 and the fixed-$m$ design A8 (Sections~\ref{sec:packed}
+and~\ref{sec:fixedm-results}); threats to validity (Section~\ref{sec:threats}); the support-boundary table; conclusions.
 \end{enumerate}
 
 \paragraph{Appendices.}
@@ -1567,8 +1719,10 @@ C: the Latin hypercube analysis of the 2019 tuning design and the effective-para
 D: reproducibility: \code{tools/characterise.py}, \code{tools/pca_feat7.py},
 \code{tools/ties_plot.py}, \code{tools/order_tie_sign.py}, \code{tools/selection_gap.py},
 \code{tools/feature_separation.py}, \code{tools/feature4_robustness.py},
-\code{tools/experiments/}, the notebook, seeds and command lines, and the commit hash of the
-preregistration of Definition~\ref{def:prereg}.
+\code{tools/regret_vs_packed.py}, \code{tools/fixed_m_s6.sh},
+\code{tools/experiments/}, the notebook, seeds and command lines, and the commit hashes of the
+preregistrations of Definitions~\ref{def:prereg} (\code{be8b79e}) and~\ref{def:prereg-m}
+(\code{3e199a4}).
 
 
 % =====================================================================
