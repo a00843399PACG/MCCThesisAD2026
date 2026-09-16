@@ -873,9 +873,10 @@ decided in the phase where its deciding quantity is measured.
   -8.1/pGreen/{A4 pooled geometry over all configurations},
   -8.7/pGreen/{A5 engine sweep $\mathcal S_5$: $\lambda_m$ and $\mu$},
   -9.3/pGreen/{A6 feature-map swap: the generator's four features},
-  -9.9/pGreen/{A7 regret against the number of packed items}}{
+  -9.9/pGreen/{A7 regret against the number of packed items},
+  -10.5/pYellow/{A8 fixed-$m$ design $\mathcal S_6$: R8--R11}}{
   \node[run=\col] (n) at (6.6,\y) {\txt}; \draw[arr] (aw.east) -- (n.west);}
-\node[font=\tiny, text=inkSoft, anchor=west] at (6.6,-10.5) {green: done; yellow: running or planned};
+\node[font=\tiny, text=inkSoft, anchor=west] at (6.6,-11.1) {green: done; yellow: running or planned};
 \end{tikzpicture}
 \captionof{figure}{Experimental methodology. Each phase feeds the next: the instruments
 validated in the first are the ones the second measures with, the predictions written in the
@@ -909,7 +910,8 @@ A3 & Seeded start & same cells & (vii), seeded & H\ref{h:budget} & done: (b) ref
 A4 & Pooled geometry & $\mathcal S_2$ & (v) pooled & descriptive & done \\
 A5 & Engine sweep & $\mathcal S_5$ & (ii), (vi) & reach of H\ref{h:selection}, H\ref{h:map} & done: H\ref{h:map}(c) is setting-dependent at $n=500$ \\
 A6 & Feature-map swap & $\mathcal S_2$, four generator features & (v), (vi) & H\ref{h:pca} & done \\
-A7 & Regret against packed items & all campaigns, $17\,440$ instances & (vi) against $m$ & exploratory & done; a fixed-$m$ design is proposed \\
+A7 & Regret against packed items & all campaigns, $17\,440$ instances & (vi) against $m$ & exploratory & done \\
+A8 & Fixed-$m$ design & $\mathcal S_6$, $960$ instances & (vi) at fixed $m$ & R8--R11 (Def.~\ref{def:prereg-m}) & predictions committed; running \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1203,9 +1205,40 @@ sits.
 \paragraph{Status of this finding.} It is exploratory and observational: $m$ was not
 manipulated at fixed everything else, but varied through $n$ and $\alpha$, and the analysis
 was run after the campaigns. The matched-$m$ pairs are the nearest thing to a controlled
-comparison. A design that fixes $m$ and varies $n$ over a decade, with the prediction that the
-mean regret changes by less than a factor of two, is the experiment that would settle it
-(A7).
+comparison. The design of Definition~\ref{def:prereg-m} settles it by holding $m$ and moving
+$n$ over a decade, with its predictions committed before the cells were generated.
+
+\begin{definition}[The fixed-$m$ design $\mathcal S_6$ and its predictions]\label{def:prereg-m}
+$\mathcal S_6$ holds the number of packed items while $n$ moves by a factor of ten:
+$b=10$, the eight labelled types, $10$ seeds, $2$ instances per call, $160$ instances per
+cell, at
+\begin{center}\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+target $m$ & $n=100$ & $n=300$ & $n=1000$ \\
+\midrule
+$20$ & $c=2\,723$ ($\alpha=0.053$) & $c=1\,386$ ($\alpha=0.009$) & $c=661$ ($\alpha=0.0013$) \\
+$60$ & $c=18\,501$ ($\alpha=0.361$) & $c=9\,417$ ($\alpha=0.061$) & $c=4\,493$ ($\alpha=0.0088$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The capacities inverse the fit $\log m=-3.163+0.573\log c+0.352\log n$ over the $15$ cells of
+$\mathcal S_2$ at $b=10$ ($R^{2}=0.998$, largest error $10.6\%$). Predictions, fixed before
+generation:
+\begin{enumerate}[label=\textbf{R\arabic*},leftmargin=2.6em,itemsep=2pt,start=8]
+\item \emph{(calibration)} the realised mean $m$ of each cell is within $25\%$ of its target.
+\item \emph{(invariance at fixed $m$)} within each target $m$, the mean relative regret of the
+three $n$ differs by less than a factor of $2.5$ between its largest and its smallest value.
+The matched pairs of Section~\ref{sec:packed} give $0.72$ per fivefold $n$, hence about $1.9$
+over a decade; the cross-cell trend in $n$ alone, if $n$ governed the regret, would give more
+than two orders of magnitude.
+\item \emph{(ordering in $m$)} at every $n$, the mean relative regret at $m=20$ is at least
+three times that at $m=60$.
+\item \emph{(bound)} $r(I)/v_{\mathrm{VBS}}(I)<2/m$ in every instance.
+\end{enumerate}
+R9 is the one that settles the question: if it fails while R10 holds, $n$ matters at fixed
+$m$ after all and the finding of Section~\ref{sec:packed} is downgraded to a correlation.
+\end{definition}
 
 \subsection{Geometry in feature space}\label{sec:pca}
 
@@ -1505,7 +1538,7 @@ A corpus filtered by \code{--require-strict} is a sample of $\Gtt$ & not support
 Margins of the bounded types can be made large by a longer search & not supported & Prop.~\ref{prop:bound}: $f_\tau<2^{\bp}$ \\
 ``Hard'' instances are hard for an exact solver (a reading the 2019 paper does not make, but its comparison with Pisinger's hard sets invites) & not supported & Prop.~\ref{prop:factor}: no hardness term in $f_\tau$ \\
 Combining heuristics during construction pays at scale & not supported: bounded by $2^{\bp}$ over \MAXPW\ on every instance & Cor.~\ref{cor:regret}(ii); the paper's $15\%$ is at $n=40$ with one or two items packed \\
-The value of selection is governed by the number of packed items, not by $n$ & supported, exploratory: $m$ alone explains $R^{2}=0.829$ of the mean regret across cells against $0.652$ for $n$; at equal $m$ a fivefold $n$ changes it by $0.72\times$ & Sec.~\ref{sec:packed} \\
+The value of selection is governed by the number of packed items, not by $n$ & supported, exploratory pending A8: $m$ alone explains $R^{2}=0.829$ of the mean regret across cells against $0.652$ for $n$; at equal $m$ a fivefold $n$ changes it by $0.72\times$ & Sec.~\ref{sec:packed} \\
 Algorithm selection over $\heur$ pays on this corpus & supported at $n\le100$ in relative terms ($0.9$--$2.9\%$ mean, a trained selector recovering a quarter to a third); not supported at $n\ge200$ & Cor.~\ref{cor:regret}; H\ref{h:selection}; Sec.~\ref{sec:selection} \\
 Any algorithm, with profits in $\{1,\dots,2^{\bp}\}$, gains $2^{\bp}$ or more over \MAXPW\ on some instance & not supported, exactly & Cor.~\ref{cor:regret}(ii) \\
 A generator whose profit range grows with $n$ is bound the same way & not addressed & outside the scope (T20) \\
