@@ -108,7 +108,11 @@ other four are delivered strictly in every cell. And the
 value of algorithm selection over the portfolio is bounded by the same window: on the emitted
 corpus the regret of always choosing \MAXPW\ falls from $2.9\%$ of the oracle value at $n=50$
 to below $0.01\%$ at $n=1000$, and a cost-sensitive selector trained on instance features
-recovers a fraction of an already negligible gap. The separation of the eight types in
+recovers a fraction of an already negligible gap. The quantity that governs that value is not
+the number of items but the number that fit in the knapsack: the regret is below $2/m$ on
+every one of the $17\,440$ instances measured, and $m$ alone explains the mean regret of a
+configuration better than $n$ does, which turns the negative result into a design rule for
+anyone building a selection benchmark with this generator. The separation of the eight types in
 feature space is shown to be a sampling effect of the feature map rather than a property
 that strengthens with $n$. Every claim is labelled exact or empirical; the empirical ones are
 tested in-sample, on a preregistered held-out design where seven of seven predictions written
@@ -627,6 +631,20 @@ the conclusion extends: whatever a hyper-heuristic gains over \MAXPW\ is less th
 in absolute terms on every instance, and so vanishes relative to the value as $n$ grows.
 \end{remark}
 
+\begin{remark}[A usable form: two over the number of packed items]\label{rem:twoverm}
+Write $m=|S_{\MAXPW}(I)|$ for the number of items \MAXPW\ packs. Its value is the sum of $m$
+profits, which under $\Utheta$ average $(2^{\bp}+1)/2$, so $v_{\MAXPW}\approx m\,2^{\bp}/2$ and
+Corollary~\ref{cor:regret}(i) becomes
+\[
+\frac{r(I)}{v_{\mathrm{VBS}}(I)}\ \lesssim\ \frac{2}{m}.
+\]
+This is not a theorem: the step from $v_{\MAXPW}$ to $m\,2^{\bp}/2$ is distributional, and on a
+corpus evolved to favour a heuristic the packed profits need not average the uniform mean. It
+is stated because it is the form a user can apply, and because it holds without exception on
+every campaign of this thesis: $r/v<2/m$ in $17\,440$ of $17\,440$ instances, with
+$\max_I (r(I)/v_{\mathrm{VBS}}(I))\,m=1.848$ \evid{V3} (Section~\ref{sec:packed}).
+\end{remark}
+
 \begin{remark}[Why the window closes with $n$]\label{rem:window}
 The window has fixed absolute width $2^{\bp}$, but at fixed $\alpha$ the profits reached
 scale with $n$ (median $v_{\MAXPW}$ on the design: $32\,347$ at $n=50$, $675\,272$ at
@@ -854,9 +872,10 @@ decided in the phase where its deciding quantity is measured.
   -7.5/pGreen/{A3 seeded start on the tie boundary},
   -8.1/pGreen/{A4 pooled geometry over all configurations},
   -8.7/pGreen/{A5 engine sweep $\mathcal S_5$: $\lambda_m$ and $\mu$},
-  -9.3/pGreen/{A6 feature-map swap: the generator's four features}}{
+  -9.3/pGreen/{A6 feature-map swap: the generator's four features},
+  -9.9/pGreen/{A7 regret against the number of packed items}}{
   \node[run=\col] (n) at (6.6,\y) {\txt}; \draw[arr] (aw.east) -- (n.west);}
-\node[font=\tiny, text=inkSoft, anchor=west] at (6.6,-9.9) {green: done; yellow: running or planned};
+\node[font=\tiny, text=inkSoft, anchor=west] at (6.6,-10.5) {green: done; yellow: running or planned};
 \end{tikzpicture}
 \captionof{figure}{Experimental methodology. Each phase feeds the next: the instruments
 validated in the first are the ones the second measures with, the predictions written in the
@@ -890,6 +909,7 @@ A3 & Seeded start & same cells & (vii), seeded & H\ref{h:budget} & done: (b) ref
 A4 & Pooled geometry & $\mathcal S_2$ & (v) pooled & descriptive & done \\
 A5 & Engine sweep & $\mathcal S_5$ & (ii), (vi) & reach of H\ref{h:selection}, H\ref{h:map} & done: H\ref{h:map}(c) is setting-dependent at $n=500$ \\
 A6 & Feature-map swap & $\mathcal S_2$, four generator features & (v), (vi) & H\ref{h:pca} & done \\
+A7 & Regret against packed items & all campaigns, $17\,440$ instances & (vi) against $m$ & exploratory & done; a fixed-$m$ design is proposed \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1132,6 +1152,60 @@ new, only its behaviour with $n$. The paper's configurations (Remark~\ref{rem:pa
 lie beyond the top-left corner of this table, with smaller $n$ and one or two items in the
 knapsack; whether their corpora behave as $\mathcal S_2$ does at $n=50$ is not measured
 here.
+
+\subsection{What governs the value of selection: the number of packed items}\label{sec:packed}
+
+\begin{plain}{the question}
+The regret of always choosing \MAXPW\ falls as instances grow. But what exactly is it falling
+with: the number of items in the instance, or the number of items that actually fit in the
+knapsack? The two are different, since the capacity ratio can be varied at fixed $n$, and the
+answer decides the advice one can give to somebody building a benchmark with this generator.
+\end{plain}
+
+Pooling every campaign ($17\,440$ instances, $m$ from $4$ to $792$;
+\code{tools/regret_vs_packed.py}, \code{runs/regret_vs_packed_cells.csv}):
+
+\begin{center}\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+packed items $m$ & instances & share with $r(I)>0$ & mean $r/v$ & mean $r/v$ when positive \\
+\midrule
+$\le8$ & $418$ & $79.2\%$ & $9.87\%$ & $12.47\%$ \\
+$9$--$16$ & $834$ & $55.3\%$ & $3.90\%$ & $7.06\%$ \\
+$17$--$32$ & $2\,233$ & $42.0\%$ & $1.16\%$ & $2.76\%$ \\
+$33$--$64$ & $3\,425$ & $33.9\%$ & $0.44\%$ & $1.30\%$ \\
+$65$--$128$ & $3\,212$ & $27.9\%$ & $0.13\%$ & $0.46\%$ \\
+$129$--$256$ & $3\,352$ & $13.7\%$ & $0.01\%$ & $0.11\%$ \\
+$>256$ & $3\,966$ & $1.1\%$ & $0.00\%$ & $0.11\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three findings. First, the bound of Remark~\ref{rem:twoverm} holds everywhere, with the
+tightest instance at $1.85$ of the allowed $2$. Second, the mean regret falls much faster than
+that bound: regressing the log mean regret of a cell on $\log m$ and $\log n$ over the $33$
+cells with a positive mean gives $-2.87$ for $m$ and $-0.42$ for $n$ ($R^{2}=0.833$), and $m$
+alone explains $R^{2}=0.829$ against $0.652$ for $n$ alone; the extra decay comes from the
+share of instances on which any heuristic beats \MAXPW\ at all, which collapses from $79\%$ to
+$1\%$ independently of how large the remaining gaps are. Third, among cells that share $m$
+within $20\%$ while $n$ differs by a factor of $2$ to $5$, the median ratio of mean regret is
+$0.72$: at equal $m$, a fivefold $n$ changes the regret by less than a third, against the four
+orders of magnitude it varies across the design. The controlling quantity is $m$, not $n$.
+
+Since $m\approx\alpha n$ under $\Utheta$, this turns the negative result into a design rule:
+\emph{with this portfolio, algorithm selection is worth something only where few items fit},
+and its value is capped by $2/m$. It also locates the 2019 study without any assumption about
+its corpora: its main configuration packs about $1.5$ items
+(Remark~\ref{rem:paperconfigs}), and the smallest bin measured here, $m\le8$, already shows a
+mean regret of $9.9\%$ and a maximum of $24\%$, the range in which its hyper-heuristic result
+sits.
+
+\paragraph{Status of this finding.} It is exploratory and observational: $m$ was not
+manipulated at fixed everything else, but varied through $n$ and $\alpha$, and the analysis
+was run after the campaigns. The matched-$m$ pairs are the nearest thing to a controlled
+comparison. A design that fixes $m$ and varies $n$ over a decade, with the prediction that the
+mean regret changes by less than a factor of two, is the experiment that would settle it
+(A7).
 
 \subsection{Geometry in feature space}\label{sec:pca}
 
@@ -1431,6 +1505,7 @@ A corpus filtered by \code{--require-strict} is a sample of $\Gtt$ & not support
 Margins of the bounded types can be made large by a longer search & not supported & Prop.~\ref{prop:bound}: $f_\tau<2^{\bp}$ \\
 ``Hard'' instances are hard for an exact solver (a reading the 2019 paper does not make, but its comparison with Pisinger's hard sets invites) & not supported & Prop.~\ref{prop:factor}: no hardness term in $f_\tau$ \\
 Combining heuristics during construction pays at scale & not supported: bounded by $2^{\bp}$ over \MAXPW\ on every instance & Cor.~\ref{cor:regret}(ii); the paper's $15\%$ is at $n=40$ with one or two items packed \\
+The value of selection is governed by the number of packed items, not by $n$ & supported, exploratory: $m$ alone explains $R^{2}=0.829$ of the mean regret across cells against $0.652$ for $n$; at equal $m$ a fivefold $n$ changes it by $0.72\times$ & Sec.~\ref{sec:packed} \\
 Algorithm selection over $\heur$ pays on this corpus & supported at $n\le100$ in relative terms ($0.9$--$2.9\%$ mean, a trained selector recovering a quarter to a third); not supported at $n\ge200$ & Cor.~\ref{cor:regret}; H\ref{h:selection}; Sec.~\ref{sec:selection} \\
 Any algorithm, with profits in $\{1,\dots,2^{\bp}\}$, gains $2^{\bp}$ or more over \MAXPW\ on some instance & not supported, exactly & Cor.~\ref{cor:regret}(ii) \\
 A generator whose profit range grows with $n$ is bound the same way & not addressed & outside the scope (T20) \\
@@ -1509,6 +1584,7 @@ target tie / pair tie / order tie & Definition~\ref{def:ties} \\
 $\Phi$ & the seven-feature map of the 2019 paper, computed once per instance \\
 VBS / SBS / $r(I)$ & per-instance oracle over $\heur$ / single best heuristic on the corpus (\MAXPW) / regret of SBS against VBS \\
 closed gap & fraction of $\sum r(I)$ a selector recovers \\
+$m$ & number of items \MAXPW\ packs; $m\approx\alpha n$ under $\Utheta$ \\
 noise floor $w^{U}$ & within-type spread of $\Phi$ on uniform instances of the same $(n,b)$ \\
 exact / empirical claim & holds for every instance or run / holds on a stated design and engine setting \\
 V1 / V2 / V3 & source inspection / compiled and executed / measured \\
