@@ -1,0 +1,85 @@
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+    50    10       1024     1000   0.05       1281   1.10e-02      11.0
+    50    10       1024     1000   0.25       6406   1.10e-02      11.0
+    50    10       1024     1000    0.5      12812   1.10e-02      11.0
+    50    14      16384     1400   0.05      20481   7.86e-03      11.0
+    50    14      16384     1400   0.25     102406   7.86e-03      11.0
+    50    14      16384     1400    0.5     204812   7.86e-03      11.0
+   100    10       1024     2000   0.05       2562   5.50e-03      11.0
+   100    10       1024     2000   0.25      12812   5.50e-03      11.0
+   100    10       1024     2000    0.5      25625   5.50e-03      11.0
+   100    14      16384     2800   0.05      40962   3.93e-03      11.0
+   100    14      16384     2800   0.25     204812   3.93e-03      11.0
+   100    14      16384     2800    0.5     409625   3.93e-03      11.0
+   200    10       1024     4000   0.05       5125   2.75e-03      11.0
+   200    10       1024     4000   0.25      25625   2.75e-03      11.0
+   200    10       1024     4000    0.5      51250   2.75e-03      11.0
+   200    14      16384     5600   0.05      81925   1.96e-03      11.0
+   200    14      16384     5600   0.25     409625   1.96e-03      11.0
+   200    14      16384     5600    0.5     819250   1.96e-03      11.0
+   500    10       1024    10000   0.05      12812   1.10e-03      11.0
+   500    10       1024    10000   0.25      64062   1.10e-03      11.0
+   500    10       1024    10000    0.5     128125   1.10e-03      11.0
+   500    14      16384    14000   0.05     204812   7.86e-04      11.0
+   500    14      16384    14000   0.25    1024062   7.86e-04      11.0
+   500    14      16384    14000    0.5    2048125   7.86e-04      11.0
+  1000    10       1024    20000   0.05      25625   5.50e-04      11.0
+  1000    10       1024    20000   0.25     128125   5.50e-04      11.0
+  1000    10       1024    20000    0.5     256250   5.50e-04      11.0
+  1000    14      16384    28000   0.05     409625   3.93e-04      11.0
+  1000    14      16384    28000   0.25    2048125   3.93e-04      11.0
+  1000    14      16384    28000    0.5    4096250   3.93e-04      11.0
+  2000    10       1024    40000   0.05      51250   2.75e-04      11.0
+  2000    10       1024    40000   0.25     256250   2.75e-04      11.0
+  2000    10       1024    40000    0.5     512500   2.75e-04      11.0
+  2000    14      16384    56000   0.05     819250   1.96e-04      11.0
+  2000    14      16384    56000   0.25    4096250   1.96e-04      11.0
+  2000    14      16384    56000    0.5    8192500   1.96e-04      11.0
+
+17280 instances over 36 configurations x 8 types
+
+  [14:10:10] 10/8640 runs (10 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 20/8640 runs (20 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 30/8640 runs (30 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 40/8640 runs (40 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 50/8640 runs (50 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 60/8640 runs (60 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 70/8640 runs (70 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 80/8640 runs (80 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 90/8640 runs (90 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 100/8640 runs (100 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 110/8640 runs (110 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 120/8640 runs (120 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 130/8640 runs (130 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 140/8640 runs (140 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 150/8640 runs (150 already on disk), elapsed 0 min, eta 0 min
+  [14:10:10] 160/8640 runs (160 already on disk), elapsed 0 min, eta 0 min
+  [14:15:10] 170/8640 runs (169 already on disk), elapsed 5 min, eta 42323 min
+  [14:18:47] 180/8640 runs (170 already on disk), elapsed 9 min, eta 7285 min
+  [14:25:05] 190/8640 runs (170 already on disk), elapsed 15 min, eta 6300 min
+  [14:33:31] 200/8640 runs (170 already on disk), elapsed 23 min, eta 6569 min
+  [14:42:36] 210/8640 runs (170 already on disk), elapsed 32 min, eta 6836 min
+  [14:55:27] 220/8640 runs (170 already on disk), elapsed 45 min, eta 7627 min
+  [15:06:09] 230/8640 runs (170 already on disk), elapsed 56 min, eta 7848 min
+  [15:17:57] 240/8640 runs (170 already on disk), elapsed 68 min, eta 8134 min
+  [15:45:28] 250/8640 runs (170 already on disk), elapsed 95 min, eta 9994 min
+  [16:08:57] 260/8640 runs (170 already on disk), elapsed 119 min, eta 11060 min
+  [16:28:34] 270/8640 runs (170 already on disk), elapsed 138 min, eta 11584 min
+  [16:56:52] 280/8640 runs (170 already on disk), elapsed 167 min, eta 12670 min
+  [17:09:17] 290/8640 runs (170 already on disk), elapsed 179 min, eta 12464 min
+  [17:10:27] 300/8640 runs (170 already on disk), elapsed 180 min, eta 11566 min
+  [17:11:37] 310/8640 runs (170 already on disk), elapsed 181 min, eta 10797 min
+  [17:12:28] 320/8640 runs (170 already on disk), elapsed 182 min, eta 10111 min
+  [17:12:59] 330/8640 runs (170 already on disk), elapsed 183 min, eta 9495 min
+  [17:13:43] 340/8640 runs (170 already on disk), elapsed 184 min, eta 8962 min
+  [17:14:32] 350/8640 runs (170 already on disk), elapsed 184 min, eta 8491 min
+  [17:15:14] 360/8640 runs (170 already on disk), elapsed 185 min, eta 8065 min
+  [17:16:20] 370/8640 runs (170 already on disk), elapsed 186 min, eta 7698 min
+  [17:17:23] 380/8640 runs (170 already on disk), elapsed 187 min, eta 7364 min
+  [17:18:38] 390/8640 runs (170 already on disk), elapsed 188 min, eta 7067 min
+  [17:20:32] 400/8640 runs (170 already on disk), elapsed 190 min, eta 6820 min
+  [17:22:35] 410/8640 runs (170 already on disk), elapsed 192 min, eta 6598 min
+  [17:23:58] 420/8640 runs (170 already on disk), elapsed 194 min, eta 6372 min
+  [17:26:20] 430/8640 runs (170 already on disk), elapsed 196 min, eta 6194 min
+  [17:31:35] 440/8640 runs (170 already on disk), elapsed 201 min, eta 6117 min
+  [17:35:23] 450/8640 runs (170 already on disk), elapsed 205 min, eta 6003 min

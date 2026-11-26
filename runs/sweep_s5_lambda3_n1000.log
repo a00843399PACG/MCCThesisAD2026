@@ -1,0 +1,15 @@
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+  1000    10       1024    20000   0.25     128125   1.50e-04       3.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [08:40:04] 10/80 runs, elapsed 8 min, eta 58 min
+  [08:44:22] 20/80 runs, elapsed 13 min, eta 38 min
+  [08:48:39] 30/80 runs, elapsed 17 min, eta 28 min
+  [08:52:51] 40/80 runs, elapsed 21 min, eta 21 min
+  [09:00:44] 50/80 runs, elapsed 29 min, eta 17 min
+  [09:04:55] 60/80 runs, elapsed 33 min, eta 11 min
+  [09:09:04] 70/80 runs, elapsed 37 min, eta 5 min
+  [09:13:09] 80/80 runs, elapsed 41 min, eta 0 min
+
+160 instances characterised -> runs/sweep_s5_lambda3_n1000/features.csv

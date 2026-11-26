@@ -1,0 +1,83 @@
+=== started Sun Sep 13 16:33:19 CST 2026 ===
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+    50    10       1024     1000   0.05       1281   1.10e-02      11.0
+    50    10       1024     1000   0.25       6406   1.10e-02      11.0
+    50    10       1024     1000    0.5      12812   1.10e-02      11.0
+    50    14      16384     1400   0.05      20481   7.86e-03      11.0
+    50    14      16384     1400   0.25     102406   7.86e-03      11.0
+    50    14      16384     1400    0.5     204812   7.86e-03      11.0
+   100    10       1024     2000   0.05       2562   5.50e-03      11.0
+   100    10       1024     2000   0.25      12812   5.50e-03      11.0
+   100    10       1024     2000    0.5      25625   5.50e-03      11.0
+   100    14      16384     2800   0.05      40962   3.93e-03      11.0
+   100    14      16384     2800   0.25     204812   3.93e-03      11.0
+   100    14      16384     2800    0.5     409625   3.93e-03      11.0
+   200    10       1024     4000   0.05       5125   2.75e-03      11.0
+   200    10       1024     4000   0.25      25625   2.75e-03      11.0
+   200    10       1024     4000    0.5      51250   2.75e-03      11.0
+   200    14      16384     5600   0.05      81925   1.96e-03      11.0
+   200    14      16384     5600   0.25     409625   1.96e-03      11.0
+   200    14      16384     5600    0.5     819250   1.96e-03      11.0
+   500    10       1024    10000   0.05      12812   1.10e-03      11.0
+   500    10       1024    10000   0.25      64062   1.10e-03      11.0
+   500    10       1024    10000    0.5     128125   1.10e-03      11.0
+   500    14      16384    14000   0.05     204812   7.86e-04      11.0
+   500    14      16384    14000   0.25    1024062   7.86e-04      11.0
+   500    14      16384    14000    0.5    2048125   7.86e-04      11.0
+  1000    10       1024    20000   0.05      25625   5.50e-04      11.0
+  1000    10       1024    20000   0.25     128125   5.50e-04      11.0
+  1000    10       1024    20000    0.5     256250   5.50e-04      11.0
+  1000    14      16384    28000   0.05     409625   3.93e-04      11.0
+  1000    14      16384    28000   0.25    2048125   3.93e-04      11.0
+  1000    14      16384    28000    0.5    4096250   3.93e-04      11.0
+
+14400 instances over 30 cells (30 configurations x 1 mutation levels) x 8 types
+
+  [16:34:08] 10/7200 runs, elapsed 1 min, eta 573 min
+  [16:34:27] 20/7200 runs, elapsed 1 min, eta 402 min
+  [16:35:08] 30/7200 runs, elapsed 2 min, eta 429 min
+  [16:35:32] 40/7200 runs, elapsed 2 min, eta 393 min
+  [16:36:18] 50/7200 runs, elapsed 3 min, eta 423 min
+  [16:37:05] 60/7200 runs, elapsed 4 min, eta 445 min
+  [16:38:19] 70/7200 runs, elapsed 5 min, eta 508 min
+  [16:39:58] 80/7200 runs, elapsed 7 min, eta 590 min
+  [16:41:05] 90/7200 runs, elapsed 8 min, eta 612 min
+  [16:42:31] 100/7200 runs, elapsed 9 min, eta 652 min
+  [16:45:13] 110/7200 runs, elapsed 12 min, eta 766 min
+  [16:48:53] 120/7200 runs, elapsed 16 min, eta 917 min
+  [16:53:28] 130/7200 runs, elapsed 20 min, eta 1095 min
+  [16:56:03] 140/7200 runs, elapsed 23 min, eta 1145 min
+  [17:20:42] 150/7200 runs, elapsed 47 min, eta 2226 min
+  [18:03:06] 160/7200 runs, elapsed 90 min, eta 3950 min
+  [18:26:24] 170/7200 runs, elapsed 113 min, eta 4676 min
+  [19:05:11] 180/7200 runs, elapsed 152 min, eta 5922 min
+  [19:58:47] 190/7200 runs, elapsed 205 min, eta 7580 min
+  [20:27:32] 200/7200 runs, elapsed 234 min, eta 8197 min
+  [21:30:16] 210/7200 runs, elapsed 297 min, eta 9884 min
+  [22:15:04] 220/7200 runs, elapsed 342 min, eta 10842 min
+  [23:13:55] 230/7200 runs, elapsed 401 min, eta 12140 min
+  [23:27:05] 240/7200 runs, elapsed 414 min, eta 11999 min
+  [23:28:19] 250/7200 runs, elapsed 415 min, eta 11537 min
+  [23:30:26] 260/7200 runs, elapsed 417 min, eta 11134 min
+  [23:31:49] 270/7200 runs, elapsed 418 min, eta 10741 min
+  [23:34:15] 280/7200 runs, elapsed 421 min, eta 10403 min
+  [23:36:58] 290/7200 runs, elapsed 424 min, eta 10094 min
+  [23:42:44] 300/7200 runs, elapsed 429 min, eta 9876 min
+  [23:46:16] 310/7200 runs, elapsed 433 min, eta 9622 min
+  [23:50:54] 320/7200 runs, elapsed 438 min, eta 9408 min
+  [23:53:50] 330/7200 runs, elapsed 441 min, eta 9170 min
+  [23:59:35] 340/7200 runs, elapsed 446 min, eta 9004 min
+  [00:08:43] 350/7200 runs, elapsed 455 min, eta 8913 min
+  [00:12:21] 360/7200 runs, elapsed 459 min, eta 8721 min
+  [00:16:18] 370/7200 runs, elapsed 463 min, eta 8546 min
+  [00:25:36] 380/7200 runs, elapsed 472 min, eta 8476 min
+  [00:34:19] 390/7200 runs, elapsed 481 min, eta 8399 min
+  [01:01:07] 400/7200 runs, elapsed 508 min, eta 8632 min
+  [01:13:46] 410/7200 runs, elapsed 520 min, eta 8619 min
+  [01:33:57] 420/7200 runs, elapsed 541 min, eta 8727 min
+  [02:01:17] 430/7200 runs, elapsed 568 min, eta 8942 min
+  [02:24:33] 440/7200 runs, elapsed 591 min, eta 9083 min
+  [03:20:56] 450/7200 runs, elapsed 648 min, eta 9714 min
+  [04:08:30] 460/7200 runs, elapsed 695 min, eta 10186 min
+  [05:02:26] 470/7200 runs, elapsed 749 min, eta 10727 min
+  [05:23:19] 480/7200 runs, elapsed 770 min, eta 10780 min

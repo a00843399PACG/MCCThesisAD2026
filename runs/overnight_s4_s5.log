@@ -1,0 +1,176 @@
+=== S4 held-out: n 300 700, b 12, alpha 0.15 0.40, 30 seeds x 2 === Mon Sep 14 20:31:29 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   300    12       4096     7200   0.15      92182   1.53e-03      11.0
+   300    12       4096     7200    0.4     245820   1.53e-03      11.0
+   700    12       4096    16800   0.15     215092   6.55e-04      11.0
+   700    12       4096    16800    0.4     573580   6.55e-04      11.0
+
+1920 instances over 4 cells (4 configurations x 1 mutation levels) x 8 types
+
+  [20:39:08] 10/960 runs, elapsed 8 min, eta 727 min
+  [20:48:07] 20/960 runs, elapsed 17 min, eta 782 min
+  [21:05:38] 30/960 runs, elapsed 34 min, eta 1058 min
+  [21:09:54] 40/960 runs, elapsed 38 min, eta 883 min
+  [21:18:59] 50/960 runs, elapsed 47 min, eta 864 min
+  [21:35:57] 60/960 runs, elapsed 64 min, eta 967 min
+  [21:48:42] 70/960 runs, elapsed 77 min, eta 982 min
+  [21:54:31] 80/960 runs, elapsed 83 min, eta 913 min
+  [22:15:02] 90/960 runs, elapsed 104 min, eta 1001 min
+  [22:25:12] 100/960 runs, elapsed 114 min, eta 978 min
+  [22:32:43] 110/960 runs, elapsed 121 min, eta 937 min
+  [22:47:19] 120/960 runs, elapsed 136 min, eta 951 min
+  [23:03:32] 130/960 runs, elapsed 152 min, eta 971 min
+  [23:09:19] 140/960 runs, elapsed 158 min, eta 924 min
+  [23:26:59] 150/960 runs, elapsed 175 min, eta 948 min
+  [23:44:49] 160/960 runs, elapsed 193 min, eta 967 min
+  [23:53:36] 170/960 runs, elapsed 202 min, eta 939 min
+  [00:04:43] 180/960 runs, elapsed 213 min, eta 924 min
+  [00:28:39] 190/960 runs, elapsed 237 min, eta 961 min
+  [00:34:31] 200/960 runs, elapsed 243 min, eta 924 min
+  [00:45:41] 210/960 runs, elapsed 254 min, eta 908 min
+  [00:55:31] 220/960 runs, elapsed 264 min, eta 888 min
+  [01:03:57] 230/960 runs, elapsed 272 min, eta 865 min
+  [01:07:36] 240/960 runs, elapsed 276 min, eta 828 min
+  [01:16:40] 250/960 runs, elapsed 285 min, eta 810 min
+  [01:20:22] 260/960 runs, elapsed 289 min, eta 778 min
+  [01:23:07] 270/960 runs, elapsed 292 min, eta 745 min
+  [01:28:51] 280/960 runs, elapsed 297 min, eta 722 min
+  [01:34:43] 290/960 runs, elapsed 303 min, eta 701 min
+  [01:36:51] 300/960 runs, elapsed 305 min, eta 672 min
+  [01:42:42] 310/960 runs, elapsed 311 min, eta 653 min
+  [01:48:07] 320/960 runs, elapsed 317 min, eta 633 min
+  [01:50:55] 330/960 runs, elapsed 319 min, eta 610 min
+  [01:54:41] 340/960 runs, elapsed 323 min, eta 589 min
+  [02:02:15] 350/960 runs, elapsed 331 min, eta 576 min
+  [02:04:24] 360/960 runs, elapsed 333 min, eta 555 min
+  [02:08:36] 370/960 runs, elapsed 337 min, eta 538 min
+  [02:14:08] 380/960 runs, elapsed 343 min, eta 523 min
+  [02:18:20] 390/960 runs, elapsed 347 min, eta 507 min
+  [02:20:34] 400/960 runs, elapsed 349 min, eta 489 min
+  [02:28:08] 410/960 runs, elapsed 357 min, eta 478 min
+  [02:32:01] 420/960 runs, elapsed 361 min, eta 464 min
+  [02:34:31] 430/960 runs, elapsed 363 min, eta 447 min
+  [02:40:09] 440/960 runs, elapsed 369 min, eta 436 min
+  [02:46:04] 450/960 runs, elapsed 375 min, eta 425 min
+  [02:48:19] 460/960 runs, elapsed 377 min, eta 410 min
+  [02:54:10] 470/960 runs, elapsed 383 min, eta 399 min
+  [02:59:42] 480/960 runs, elapsed 388 min, eta 388 min
+  [03:02:22] 490/960 runs, elapsed 391 min, eta 375 min
+  [03:06:10] 500/960 runs, elapsed 395 min, eta 363 min
+  [03:13:47] 510/960 runs, elapsed 402 min, eta 355 min
+  [03:16:01] 520/960 runs, elapsed 405 min, eta 342 min
+  [03:20:11] 530/960 runs, elapsed 409 min, eta 332 min
+  [03:25:44] 540/960 runs, elapsed 414 min, eta 322 min
+  [03:30:07] 550/960 runs, elapsed 419 min, eta 312 min
+  [03:32:19] 560/960 runs, elapsed 421 min, eta 301 min
+  [03:39:55] 570/960 runs, elapsed 428 min, eta 293 min
+  [03:43:44] 580/960 runs, elapsed 432 min, eta 283 min
+  [03:46:25] 590/960 runs, elapsed 435 min, eta 273 min
+  [03:51:56] 600/960 runs, elapsed 440 min, eta 264 min
+  [03:57:58] 610/960 runs, elapsed 446 min, eta 256 min
+  [03:59:58] 620/960 runs, elapsed 448 min, eta 246 min
+  [04:06:01] 630/960 runs, elapsed 455 min, eta 238 min
+  [04:11:24] 640/960 runs, elapsed 460 min, eta 230 min
+  [04:14:07] 650/960 runs, elapsed 463 min, eta 221 min
+  [04:17:55] 660/960 runs, elapsed 466 min, eta 212 min
+  [04:25:53] 670/960 runs, elapsed 474 min, eta 205 min
+  [04:27:51] 680/960 runs, elapsed 476 min, eta 196 min
+  [04:32:16] 690/960 runs, elapsed 481 min, eta 188 min
+  [04:37:32] 700/960 runs, elapsed 486 min, eta 181 min
+  [04:42:00] 710/960 runs, elapsed 491 min, eta 173 min
+  [04:43:59] 720/960 runs, elapsed 492 min, eta 164 min
+  [04:51:50] 730/960 runs, elapsed 500 min, eta 158 min
+  [04:55:26] 740/960 runs, elapsed 504 min, eta 150 min
+  [04:58:10] 750/960 runs, elapsed 507 min, eta 142 min
+  [05:03:31] 760/960 runs, elapsed 512 min, eta 135 min
+  [05:09:44] 770/960 runs, elapsed 518 min, eta 128 min
+  [05:11:40] 780/960 runs, elapsed 520 min, eta 120 min
+  [05:17:48] 790/960 runs, elapsed 526 min, eta 113 min
+  [05:23:09] 800/960 runs, elapsed 532 min, eta 106 min
+  [05:25:54] 810/960 runs, elapsed 534 min, eta 99 min
+  [05:29:30] 820/960 runs, elapsed 538 min, eta 92 min
+  [05:37:16] 830/960 runs, elapsed 546 min, eta 85 min
+  [05:39:14] 840/960 runs, elapsed 548 min, eta 78 min
+  [05:43:38] 850/960 runs, elapsed 552 min, eta 71 min
+  [05:49:00] 860/960 runs, elapsed 558 min, eta 65 min
+  [05:53:23] 870/960 runs, elapsed 562 min, eta 58 min
+  [05:55:28] 880/960 runs, elapsed 564 min, eta 51 min
+  [06:03:14] 890/960 runs, elapsed 572 min, eta 45 min
+  [06:06:49] 900/960 runs, elapsed 575 min, eta 38 min
+  [06:09:31] 910/960 runs, elapsed 578 min, eta 32 min
+  [06:14:42] 920/960 runs, elapsed 583 min, eta 25 min
+  [06:20:52] 930/960 runs, elapsed 589 min, eta 19 min
+  [06:22:58] 940/960 runs, elapsed 591 min, eta 13 min
+  [06:28:56] 950/960 runs, elapsed 597 min, eta 6 min
+  [06:34:09] 960/960 runs, elapsed 603 min, eta 0 min
+
+1920 instances characterised -> runs/holdout_s4/features.csv
+=== S5a engine sweep: lambda_m 3 and 33, mu 10 === Tue Sep 15 06:34:13 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   100    10       1024     2000   0.25      12812   1.50e-03       3.0
+   100    10       1024     2000   0.25      12812   1.65e-02      33.0
+   500    10       1024    10000   0.25      64062   3.00e-04       3.0
+   500    10       1024    10000   0.25      64062   3.30e-03      33.0
+
+640 instances over 4 cells (2 configurations x 2 mutation levels) x 8 types
+
+  [06:34:59] 10/320 runs, elapsed 1 min, eta 24 min
+  [06:36:48] 20/320 runs, elapsed 3 min, eta 39 min
+  [06:41:29] 30/320 runs, elapsed 7 min, eta 70 min
+  [06:41:57] 40/320 runs, elapsed 8 min, eta 54 min
+  [06:44:07] 50/320 runs, elapsed 10 min, eta 53 min
+  [06:47:18] 60/320 runs, elapsed 13 min, eta 57 min
+  [06:49:22] 70/320 runs, elapsed 15 min, eta 54 min
+  [06:49:58] 80/320 runs, elapsed 16 min, eta 47 min
+  [06:54:36] 90/320 runs, elapsed 20 min, eta 52 min
+  [06:56:29] 100/320 runs, elapsed 22 min, eta 49 min
+  [06:57:15] 110/320 runs, elapsed 23 min, eta 44 min
+  [07:00:24] 120/320 runs, elapsed 26 min, eta 44 min
+  [07:03:48] 130/320 runs, elapsed 30 min, eta 43 min
+  [07:04:25] 140/320 runs, elapsed 30 min, eta 39 min
+  [07:07:40] 150/320 runs, elapsed 33 min, eta 38 min
+  [07:11:01] 160/320 runs, elapsed 37 min, eta 37 min
+  [07:11:38] 170/320 runs, elapsed 37 min, eta 33 min
+  [07:13:34] 180/320 runs, elapsed 39 min, eta 31 min
+  [07:18:09] 190/320 runs, elapsed 44 min, eta 30 min
+  [07:18:45] 200/320 runs, elapsed 45 min, eta 27 min
+  [07:20:46] 210/320 runs, elapsed 47 min, eta 24 min
+  [07:23:59] 220/320 runs, elapsed 50 min, eta 23 min
+  [07:25:57] 230/320 runs, elapsed 52 min, eta 20 min
+  [07:26:38] 240/320 runs, elapsed 52 min, eta 17 min
+  [07:31:12] 250/320 runs, elapsed 57 min, eta 16 min
+  [07:33:12] 260/320 runs, elapsed 59 min, eta 14 min
+  [07:33:57] 270/320 runs, elapsed 60 min, eta 11 min
+  [07:37:08] 280/320 runs, elapsed 63 min, eta 9 min
+  [07:40:24] 290/320 runs, elapsed 66 min, eta 7 min
+  [07:41:05] 300/320 runs, elapsed 67 min, eta 4 min
+  [07:44:13] 310/320 runs, elapsed 70 min, eta 2 min
+  [07:47:33] 320/320 runs, elapsed 73 min, eta 0 min
+
+640 instances characterised -> runs/sweep_s5_lambda/features.csv
+=== S5b engine sweep: mu 30, lambda_m 11 === Tue Sep 15 07:47:34 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   100    10       1024     2000   0.25      12812   5.50e-03      11.0
+   500    10       1024    10000   0.25      64062   1.10e-03      11.0
+
+320 instances over 2 cells (2 configurations x 1 mutation levels) x 8 types
+
+  [07:49:38] 10/160 runs, elapsed 2 min, eta 31 min
+  [07:51:29] 20/160 runs, elapsed 4 min, eta 27 min
+  [07:54:50] 30/160 runs, elapsed 7 min, eta 31 min
+  [07:55:26] 40/160 runs, elapsed 8 min, eta 24 min
+  [07:58:44] 50/160 runs, elapsed 11 min, eta 25 min
+  [08:00:39] 60/160 runs, elapsed 13 min, eta 22 min
+  [08:02:38] 70/160 runs, elapsed 15 min, eta 19 min
+  [08:05:49] 80/160 runs, elapsed 18 min, eta 18 min
+  [08:07:47] 90/160 runs, elapsed 20 min, eta 16 min
+  [08:09:47] 100/160 runs, elapsed 22 min, eta 13 min
+  [08:13:02] 110/160 runs, elapsed 25 min, eta 12 min
+  [08:13:45] 120/160 runs, elapsed 26 min, eta 9 min
+  [08:16:58] 130/160 runs, elapsed 29 min, eta 7 min
+  [08:18:56] 140/160 runs, elapsed 31 min, eta 4 min
+  [08:20:53] 150/160 runs, elapsed 33 min, eta 2 min
+  [08:24:17] 160/160 runs, elapsed 37 min, eta 0 min
+
+320 instances characterised -> runs/sweep_s5_mu30/features.csv
+=== done === Tue Sep 15 08:24:17 CST 2026

@@ -1,0 +1,147 @@
+=== m20: n=100 alpha=0.053135 === Tue Sep 15 19:47:19 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   100    10       1024     2000 0.053135       2723   5.50e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [19:48:41] 10/80 runs, elapsed 1 min, eta 9 min
+  [19:49:20] 20/80 runs, elapsed 2 min, eta 6 min
+  [19:50:00] 30/80 runs, elapsed 3 min, eta 4 min
+  [19:50:41] 40/80 runs, elapsed 3 min, eta 3 min
+  [19:52:02] 50/80 runs, elapsed 5 min, eta 3 min
+  [19:52:46] 60/80 runs, elapsed 5 min, eta 2 min
+  [19:53:32] 70/80 runs, elapsed 6 min, eta 1 min
+  [19:54:18] 80/80 runs, elapsed 7 min, eta 0 min
+
+160 instances characterised -> runs/fixed_m_s6/features.csv
+=== m20: n=300 alpha=0.009017 === Tue Sep 15 19:54:18 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   300    10       1024     6000 0.009017       1386   1.83e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [19:59:04] 10/80 runs, elapsed 5 min, eta 33 min
+  [20:01:22] 20/80 runs, elapsed 7 min, eta 21 min
+  [20:03:28] 30/80 runs, elapsed 9 min, eta 15 min
+  [20:05:44] 40/80 runs, elapsed 11 min, eta 11 min
+  [20:09:29] 50/80 runs, elapsed 15 min, eta 9 min
+  [20:11:20] 60/80 runs, elapsed 17 min, eta 6 min
+  [20:13:03] 70/80 runs, elapsed 19 min, eta 3 min
+  [20:14:43] 80/80 runs, elapsed 20 min, eta 0 min
+
+320 instances characterised -> runs/fixed_m_s6/features.csv
+=== m20: n=1000 alpha=0.00129 === Tue Sep 15 20:14:44 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+  1000    10       1024    20000 0.00129        661   5.50e-04      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [20:27:32] 10/80 runs, elapsed 13 min, eta 90 min
+  [20:34:04] 20/80 runs, elapsed 19 min, eta 58 min
+  [20:40:45] 30/80 runs, elapsed 26 min, eta 43 min
+  [20:47:43] 40/80 runs, elapsed 33 min, eta 33 min
+  [21:00:13] 50/80 runs, elapsed 45 min, eta 27 min
+=== relaunched Wed Sep 16 13:55:32 CST 2026 (resume) ===
+=== m20: n=100 alpha=0.053135 === Wed Sep 16 13:55:32 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   100    10       1024     2000 0.053135       2723   5.50e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [13:55:32] 10/80 runs (10 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 20/80 runs (20 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 30/80 runs (30 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 40/80 runs (40 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 50/80 runs (50 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 60/80 runs (60 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 70/80 runs (70 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 80/80 runs (80 already on disk), elapsed 0 min, eta 0 min
+
+80 shards were already complete and were not rerun.
+
+440 instances characterised -> runs/fixed_m_s6/features.csv
+=== m20: n=300 alpha=0.009017 === Wed Sep 16 13:55:32 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   300    10       1024     6000 0.009017       1386   1.83e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [13:55:32] 10/80 runs (10 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 20/80 runs (20 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 30/80 runs (30 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 40/80 runs (40 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 50/80 runs (50 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 60/80 runs (60 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 70/80 runs (70 already on disk), elapsed 0 min, eta 0 min
+  [13:55:32] 80/80 runs (80 already on disk), elapsed 0 min, eta 0 min
+
+80 shards were already complete and were not rerun.
+
+440 instances characterised -> runs/fixed_m_s6/features.csv
+=== m20: n=1000 alpha=0.00129 === Wed Sep 16 13:55:33 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+  1000    10       1024    20000 0.00129        661   5.50e-04      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [13:55:33] 10/80 runs (10 already on disk), elapsed 0 min, eta 0 min
+  [13:55:33] 20/80 runs (20 already on disk), elapsed 0 min, eta 0 min
+  [13:55:33] 30/80 runs (30 already on disk), elapsed 0 min, eta 0 min
+  [13:55:33] 40/80 runs (40 already on disk), elapsed 0 min, eta 0 min
+  [13:55:33] 50/80 runs (50 already on disk), elapsed 0 min, eta 0 min
+  [13:59:29] 60/80 runs (56 already on disk), elapsed 4 min, eta 20 min
+  [14:04:36] 70/80 runs (56 already on disk), elapsed 9 min, eta 6 min
+  [14:10:04] 80/80 runs (56 already on disk), elapsed 15 min, eta 0 min
+
+56 shards were already complete and were not rerun.
+
+480 instances characterised -> runs/fixed_m_s6/features.csv
+=== m60: n=100 alpha=0.361 === Wed Sep 16 14:10:05 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   100    10       1024     2000  0.361      18501   5.50e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [14:10:50] 10/80 runs, elapsed 1 min, eta 5 min
+  [14:11:12] 20/80 runs, elapsed 1 min, eta 3 min
+  [14:11:36] 30/80 runs, elapsed 2 min, eta 3 min
+  [14:12:00] 40/80 runs, elapsed 2 min, eta 2 min
+  [14:12:43] 50/80 runs, elapsed 3 min, eta 2 min
+  [14:13:06] 60/80 runs, elapsed 3 min, eta 1 min
+  [14:13:31] 70/80 runs, elapsed 3 min, eta 0 min
+  [14:13:54] 80/80 runs, elapsed 4 min, eta 0 min
+
+640 instances characterised -> runs/fixed_m_s6/features.csv
+=== m60: n=300 alpha=0.06125 === Wed Sep 16 14:13:55 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+   300    10       1024     6000 0.06125       9417   1.83e-03      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [14:16:31] 10/80 runs, elapsed 3 min, eta 18 min
+  [14:18:01] 20/80 runs, elapsed 4 min, eta 12 min
+  [14:19:26] 30/80 runs, elapsed 6 min, eta 9 min
+  [14:20:44] 40/80 runs, elapsed 7 min, eta 7 min
+  [14:23:11] 50/80 runs, elapsed 9 min, eta 6 min
+  [14:24:34] 60/80 runs, elapsed 11 min, eta 4 min
+  [14:25:50] 70/80 runs, elapsed 12 min, eta 2 min
+  [14:27:04] 80/80 runs, elapsed 13 min, eta 0 min
+
+800 instances characterised -> runs/fixed_m_s6/features.csv
+=== m60: n=1000 alpha=0.008767 === Wed Sep 16 14:27:06 CST 2026
+     n  bits  Wmax=Pmax        L  alpha          c         pm  lambda_m
+  1000    10       1024    20000 0.008767       4493   5.50e-04      11.0
+
+160 instances over 1 cells (1 configurations x 1 mutation levels) x 8 types
+
+  [14:37:01] 10/80 runs, elapsed 10 min, eta 69 min
+  [14:42:16] 20/80 runs, elapsed 15 min, eta 46 min
+  [14:47:08] 30/80 runs, elapsed 20 min, eta 33 min
+  [14:52:30] 40/80 runs, elapsed 25 min, eta 25 min
+  [15:02:00] 50/80 runs, elapsed 35 min, eta 21 min
+  [15:06:53] 60/80 runs, elapsed 40 min, eta 13 min
+  [15:12:03] 70/80 runs, elapsed 45 min, eta 6 min
+  [15:17:09] 80/80 runs, elapsed 50 min, eta 0 min
+
+960 instances characterised -> runs/fixed_m_s6/features.csv
+=== done === Wed Sep 16 15:17:11 CST 2026

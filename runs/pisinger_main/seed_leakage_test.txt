@@ -1,0 +1,71 @@
+1. seed formula sigma = 100003b + 1009s + 7n
+   rows              : 14400
+   exact             : 14400
+   s_range           : (1, 30)
+   distinct_seeds    : 300
+   injective         : True
+
+2. crossing of the 30 seeds over 3 alpha x 8 types
+   identical_seed_set: True
+   calls_per_seed    : 24
+   instances_per_seed: 48
+
+3. intraclass correlation of the master seed (7 features standardized in cell)
+   within_call   : mean  0.003  per feature [ 0.02 -0.00 -0.00  0.01  0.02 -0.01 -0.01]
+   across_alpha  : mean  0.015  per feature [0.00 0.00 0.03 0.02 0.03 0.02 0.01]
+   across_type   : mean  0.008  per feature [0.01 0.01 0.01 0.00 0.01 0.00 0.02]
+   master_seed   : mean  0.004  per feature [0.01 0.00 0.00 0.00 0.00 0.00 0.01]
+
+4. master-seed ICC by n, bounded against unbounded types
+      unbounded  bounded
+n                       
+50        0.008    0.013
+100       0.020    0.027
+200       0.022    0.016
+500       0.009    0.003
+1000      0.017    0.018
+
+5. permutation null, s shuffled inside each cell, 500 draws
+   observed 0.0041   null 0.0007 (sd 0.0016)   p = 0.0180
+
+6. design effect for an analysis pooled over alpha and type within (n,b)
+   k=24  design effect  1.10   n_eff    13150 of 14400
+   k=48  design effect  1.19   n_eff    12058 of 14400
+
+7. concentration of the feature map, sd ~ n^-gamma
+   w_mean    : 0.442
+   w_median  : 0.453
+   w_std     : 0.497
+   p_mean    : 0.429
+   p_median  : 0.455
+   p_std     : 0.489
+   rho01     : 0.447
+   pooled    : 0.459
+
+8. realized capacity ratio against the nominal alpha
+         mean     std     min     max
+alpha                                
+0.05   0.0501  0.0089  0.0355  0.1078
+0.25   0.2613  0.0479  0.1924  0.4965
+0.50   0.5572  0.1235  0.3681  1.0275
+
+   instances with c >= sum(w): 88 of 14400
+
+   MAXPW-hard by nominal alpha and n:
+              N  strict  degenerate  alpha_real  w_mean_rel  m_over_n
+alpha n                                                              
+0.05  50    120     120           0       0.042       0.597     0.124
+      100   120       4           0       0.041       0.608     0.126
+      200   120       0           0       0.042       0.601     0.113
+      500   120       0           0       0.042       0.593     0.103
+      1000  120       0           0       0.042       0.596     0.099
+0.25  50    120       7           0       0.231       0.547     0.428
+      100   120       0           0       0.223       0.564     0.387
+      200   120       0           0       0.222       0.564     0.367
+      500   120       0           0       0.219       0.571     0.344
+      1000  120       0           0       0.218       0.573     0.335
+0.50  50    120      89           3       0.869       0.292     0.934
+      100   120      40          32       0.947       0.265     0.979
+      200   120      14          53       0.948       0.267     0.976
+      500   120       0           0       0.533       0.471     0.680
+      1000  120       0           0       0.491       0.510     0.621

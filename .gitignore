@@ -13,8 +13,5 @@ build/
 bin/
 *.class
 
-# campaign output (large, regenerable); the three sets the thesis cites are versioned
-runs/*
-!runs/ch5_mutation/
-!runs/fixed_m_s6/
-!runs/holdout_s4/
+# campaign output: versioned in full, so every number in the thesis can be checked
+# against the files the generator actually emitted
