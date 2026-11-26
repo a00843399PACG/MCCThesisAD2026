@@ -13,5 +13,8 @@ build/
 bin/
 *.class
 
-# campaign output (large, regenerable)
-runs/
+# campaign output (large, regenerable); the three sets the thesis cites are versioned
+runs/*
+!runs/ch5_mutation/
+!runs/fixed_m_s6/
+!runs/holdout_s4/
